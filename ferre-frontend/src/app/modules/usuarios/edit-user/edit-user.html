@@ -1,0 +1,124 @@
+<div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-row flex-column-fluid page">
+        <app-sidebar></app-sidebar>
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+        <app-top></app-top>  
+
+        <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+            <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                <!--begin::Info-->
+                <div class="d-flex align-items-center flex-wrap mr-2">
+                    <!--begin::Page Title-->
+                    <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">ERP Ferronix</h5>
+                    <!--end::Page Title-->
+                    <!--begin::Actions-->
+                    <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+                    <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+                    <a [routerLink]="['/config/usuarios']" class="btn btn-light-warning font-weight-bolder btn-sm">Refresh</a>
+                    <!--end::Actions-->
+                </div>
+                <!--end::Info-->
+                
+            </div>
+        </div>
+        <!--end::Subheader-->
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+            <!--begin::Container-->
+            <div class="container">
+                <!--begin::Dashboard-->
+                <!--begin::Row-->
+                <div class="row justify-content-center">
+                    <div class="card card-custom mb-7 w-90">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                Creación de usuario, asignación de rol y de empresa
+                            </h3>
+                            <div class="card-toolbar">
+                                <div class="example-tools justify-content-center">
+                                    <span class="example-toggle" data-toggle="tooltip" title="" data-original-title="View code"></span>
+                                    <span class="example-copy" data-toggle="tooltip" title="" data-original-title="Copy code"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <form class="form">
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <div class="col-lg-4">
+                                        <label>Nombre Usuario:</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend"><span class="input-group-text"><i class="la la-user"></i></span></div>
+                                            <input required type="text" class="form-control" placeholder="Usuario" name="nombre" [(ngModel)]="usuario.nombre"/>
+                                        </div>
+                                        <span class="form-text text-muted">Por favor ingrese el nombre de usuario</span>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label>Email:</label>
+                                        <input required type="email" class="form-control" placeholder="Ingrese el email" name="correo" [(ngModel)]="usuario.correo"/>
+                                        <span class="form-text text-muted">Por favor ingrese el email del usuario</span>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label>Password:</label>
+                                        <div class="input-group">                                            
+                                            <input required [type]="showPassword ? 'text' : 'password'" class="form-control" placeholder="Ingrese su contraseña" name="contrasena" [(ngModel)]="usuario.contrasena"/>
+                                            <div class="input-group-prepend" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                                                <span class="input-group-text">
+                                                    <i [ngClass]="showPassword ? 'la la-eye-slash' : 'la la-eye'"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <span class="form-text text-muted">Por favor ingrese la contraseña del usuario</span>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-lg-6">
+                                        <label>Rol:</label>
+                                        <div class="input-group">
+                                            <select required class="form-control" name="rol_id" [(ngModel)]="usuario.rol_id" disabled>
+                                                <option value="" selected disabled >Seleccione una opción</option>                                                
+                                                <option value="{{item.id}}" *ngFor="let item of roles">{{item.nombre}}</option>                                                
+                                            </select>
+                                        </div>                                        
+                                        <span class="form-text text-muted">Seleccione el tipo de Rol para el usuario</span>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label>Empresa:</label>
+                                        <div class="input-group">                                            
+                                            <select required class="form-control" name="empresa_id" [(ngModel)]="usuario.empresa_id" >
+                                                <option value="" selected disabled >Seleccione una opción</option>
+                                                <option [value]="item.id" *ngFor="let item of empresas">{{item.nombre}}</option>                                                
+                                            </select>
+                                        </div>
+                                        <span class="form-text text-muted">Seleccione la empresa para el usuario</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-lg-4"></div>
+                                    <div class="col-lg-8">
+                                        <button type="button" class="btn btn-primary mr-2" (click)="save_user()">
+                                            <span *ngIf="!btn_guardar" class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true">Guardar</span>
+                                            <span *ngIf="btn_guardar">Guardar</span>
+                                        </button>                                        
+                                        <button type="reset" class="btn btn-secondary" [routerLink]="['/config/usuarios']">Cancelar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                </div>
+                <!--end::Row-->
+                
+            </div>
+            <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+    </div>
+    <!--end::Content-->    
+    </div>
+</div>
+</div>

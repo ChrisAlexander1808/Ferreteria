@@ -1,0 +1,513 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">
+                Nuevo Pago
+              </span>
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Nuevo Pago
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Registro de pago aplicado a cuentas por cobrar/pagar
+                    </span>
+                  </h3>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Loader inicial -->
+                <div *ngIf="loadingData" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <div *ngIf="!loadingData">
+                  <!-- Origen + entidad + monto -->
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Origen <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <div class="btn-group">
+                        <button
+                          type="button"
+                          class="btn btn-sm"
+                          [ngClass]="{
+                            'btn-primary': origen === 'CXC',
+                            'btn-outline-primary': origen !== 'CXC'
+                          }"
+                          (click)="setOrigen('CXC')"
+                        >
+                          Cliente (CxC)
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn btn-sm ml-2"
+                          [ngClass]="{
+                            'btn-info': origen === 'CXP',
+                            'btn-outline-info': origen !== 'CXP'
+                          }"
+                          (click)="setOrigen('CXP')"
+                        >
+                          Proveedor (CxP)
+                        </button>
+                      </div>
+                    </div>
+
+                    <label class="col-lg-2 col-form-label text-left">
+                      Monto total pago <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        class="form-control"
+                        name="pagoMontoTotal"
+                        [(ngModel)]="pagoMontoTotal"
+                      />
+                      <small class="form-text text-muted">
+                        Este será el monto total del pago registrado.
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- Cliente / Proveedor + fecha/método -->
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      {{ origen === 'CXC' ? 'Cliente' : 'Proveedor' }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <!-- Cliente -->
+                      <ng-select
+                        *ngIf="origen === 'CXC'; else proveedorSelect"
+                        [items]="clientes"
+                        bindLabel="nombre"
+                        bindValue="id"
+                        placeholder="Seleccionar cliente"
+                        [(ngModel)]="selectedClienteId"
+                        [searchable]="true"
+                        [clearable]="true"
+                        [searchFn]="clienteSearchFn"
+                        name="cliente_id"
+                        class="w-100"
+                        (change)="onEntidadChange()"
+                      >
+                        <ng-template ng-option-tmp let-item="item">
+                          {{ item.nombre }}
+                          <span *ngIf="item.nit"> - NIT: {{ item.nit }}</span>
+                        </ng-template>
+                      </ng-select>
+
+                      <!-- Proveedor -->
+                      <ng-template #proveedorSelect>
+                        <ng-select
+                          [items]="proveedores"
+                          bindLabel="nombre"
+                          bindValue="id"
+                          placeholder="Seleccionar proveedor"
+                          [(ngModel)]="selectedProveedorId"
+                          [searchable]="true"
+                          [clearable]="true"
+                          [searchFn]="proveedorSearchFn"
+                          name="proveedor_id"
+                          class="w-100"
+                          (change)="onEntidadChange()"
+                        >
+                          <ng-template ng-option-tmp let-item="item">
+                            {{ item.nombre }}
+                            <span *ngIf="item.nit"> - NIT: {{ item.nit }}</span>
+                          </ng-template>
+                        </ng-select>
+                      </ng-template>
+                    </div>
+
+                    <label class="col-lg-2 col-form-label text-left">
+                      Fecha pago <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <input
+                        type="date"
+                        class="form-control"
+                        name="fecha_pago"
+                        [(ngModel)]="fecha_pago"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Método de pago <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <ng-select
+                        [items]="metodosPago"
+                        bindLabel="nombre"
+                        bindValue="id"
+                        placeholder="Seleccione método de pago"
+                        [(ngModel)]="selectedMetodoPagoId"
+                        name="metodo_pago_id"
+                        class="w-100"
+                        [clearable]="true"
+                      >
+                        <ng-template ng-option-tmp let-item="item">
+                          {{ item.nombre }}
+                          <span *ngIf="item.descripcion">
+                            - {{ item.descripcion }}
+                          </span>
+                        </ng-template>
+                      </ng-select>
+                    </div>
+
+                    <label class="col-lg-2 col-form-label text-left">
+                      Referencia
+                    </label>
+                    <div class="col-lg-4">
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="referencia"
+                        [(ngModel)]="referencia"
+                        placeholder="No. boleta / transferencia / otro"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Observación
+                    </label>
+                    <div class="col-lg-10">
+                      <textarea
+                        class="form-control"
+                        rows="2"
+                        name="observacion"
+                        [(ngModel)]="observacion"
+                        placeholder="Comentarios adicionales del pago"
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <hr />
+
+                  <!-- INFO -->
+                  <div class="alert alert-custom alert-light-primary" role="alert">
+                    <div class="alert-icon">
+                      <i class="flaticon2-information"></i>
+                    </div>
+                    <div class="alert-text">
+                      Ingrese el monto total del pago y luego agregue
+                      manualmente las facturas/documentos a los que desea
+                      aplicarlo. La suma aplicada no debe exceder el saldo de
+                      cada documento ni el monto total del pago.
+                    </div>
+                  </div>
+
+                  <!-- Loader docs -->
+                  <div *ngIf="loadingDocs" class="text-center my-5">
+                    <div
+                      class="spinner-border"
+                      style="width: 2.5rem; height: 2.5rem"
+                      role="status"
+                    >
+                      <span class="sr-only">Cargando documentos...</span>
+                    </div>
+                  </div>
+
+                  <!-- Detalle -->
+                  <h4 class="mb-4">Detalle del pago</h4>
+
+                  <div class="mb-3">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary btn-sm font-weight-bold"
+                      (click)="addLinea()"
+                    >
+                      <i class="flaticon-add-circular-button"></i>
+                      Agregar documento
+                    </button>
+                  </div>
+
+                  <div
+                    class="table-responsive"
+                    *ngIf="lineas && lineas.length > 0"
+                  >
+                    <table class="table table-head-custom table-vertical-center">
+                      <thead>
+                        <tr class="text-left">
+                          <th style="min-width: 60px">#</th>
+                          <th style="min-width: 200px">Documento</th>
+                          <th style="min-width: 110px">Emisión</th>
+                          <th style="min-width: 110px">Vencimiento</th>
+                          <th style="min-width: 100px">Estado</th>
+                          <th style="min-width: 120px">Total</th>
+                          <th style="min-width: 140px">Saldo pendiente</th>
+                          <th style="min-width: 140px">Monto a aplicar</th>
+                          <th style="min-width: 60px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let l of lineas; let i = index">
+                          <td>{{ i + 1 }}</td>
+
+                          <!-- Documento -->
+                          <td style="min-width: 260px">
+                            <ng-select
+                                [items]="docsDisponibles"
+                                bindLabel="doc"
+                                bindValue="id"
+                                [searchable]="true"
+                                [clearable]="true"
+                                class="w-100"
+                                name="doc_{{ i }}"
+                                [(ngModel)]="l.doc_id"
+                                (change)="onDocumentoChange(l)"
+                            >
+                                <!-- opciones del dropdown -->
+                                <ng-template ng-option-tmp let-item="item">
+                                <div class="d-flex flex-column">
+                                    <span class="font-weight-bold">
+                                    {{ origen === 'CXC' ? '#Venta:' : '#Compra:' }}
+                                    {{
+                                      origen === 'CXC'
+                                        ? (item.venta_id || '-')
+                                        : (item.compra_id || '-')
+                                    }}
+                                    |
+                                    #Factura: {{ item.doc }}
+                                    </span>
+                                    <span class="text-muted font-size-sm">
+                                    Fecha: {{ item.fecha_emision | date: 'yyyy-MM-dd' }}
+                                    &nbsp;|&nbsp;
+                                    Saldo: {{ item.saldo_pendiente | currency: 'Q' }}
+                                    </span>
+                                </div>
+                                </ng-template>
+
+                                <!-- etiqueta cuando ya está seleccionado -->
+                                <ng-template ng-label-tmp let-item="item">
+                                {{ origen === 'CXC' ? '#Venta' : '#Compra' }}
+                                {{
+                                  origen === 'CXC'
+                                    ? (item.venta_id || '-')
+                                    : (item.compra_id || '-')
+                                }}
+                                - {{ item.doc }} -
+                                Saldo: {{ item.saldo_pendiente | currency: 'Q' }}
+                                </ng-template>
+                            </ng-select>                            
+
+                          </td>
+
+                          <!-- Emisión -->
+                          <td>
+                            <span *ngIf="l.fecha_emision; else sinEmision">
+                              {{ l.fecha_emision | date: 'yyyy-MM-dd' }}
+                            </span>
+                            <ng-template #sinEmision>
+                              <span class="text-muted">-</span>
+                            </ng-template>
+                          </td>
+
+                          <!-- Vencimiento -->
+                          <td>
+                            <span *ngIf="l.fecha_vencimiento; else sinVence">
+                              {{ l.fecha_vencimiento | date: 'yyyy-MM-dd' }}
+                            </span>
+                            <ng-template #sinVence>
+                              <span class="text-muted">Sin fecha</span>
+                            </ng-template>
+                          </td>
+
+                          <!-- Estado -->
+                          <td>
+                            <span
+                              class="badge badge-pill"
+                              [ngClass]="{
+                                'badge-warning': l.estado === 'PENDIENTE',
+                                'badge-info': l.estado === 'PARCIAL',
+                                'badge-success': l.estado === 'PAGADA',
+                                'badge-danger': l.estado === 'VENCIDA'
+                              }"
+                            >
+                              {{ l.estado || '-' }}
+                            </span>
+                          </td>
+
+                          <!-- Total -->
+                          <td>
+                            <span *ngIf="l.monto_total != null; else sinTotal">
+                              {{ l.monto_total | currency: 'Q' }}
+                            </span>
+                            <ng-template #sinTotal>
+                              <span class="text-muted">-</span>
+                            </ng-template>
+                          </td>
+
+                          <!-- Saldo pendiente -->
+                          <td>
+                            <strong
+                              *ngIf="
+                                l.saldo_pendiente != null;
+                                else sinSaldo
+                              "
+                            >
+                              {{ l.saldo_pendiente | currency: 'Q' }}
+                            </strong>
+                            <ng-template #sinSaldo>
+                              <span class="text-muted">-</span>
+                            </ng-template>
+                          </td>
+
+                          <!-- Monto a aplicar -->
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              class="form-control"
+                              [(ngModel)]="l.monto_aplicado"
+                              name="monto_aplicado_{{ i }}"
+                              (change)="onMontoChange(l)"
+                              [ngClass]="{ 'is-invalid': l.errorMonto }"
+                            />
+
+                            <div
+                              *ngIf="l.errorMonto"
+                              class="invalid-feedback d-block"
+                            >
+                              {{ l.errorMsg }}
+                            </div>
+                          </td>
+
+                          <!-- Quitar línea -->
+                          <td class="text-center">
+                            <a
+                              style="cursor: pointer"
+                              (click)="removeLinea(i)"
+                            >
+                              <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div
+                    *ngIf="!lineas || lineas.length === 0"
+                    class="text-muted text-center my-5"
+                  >
+                    No hay documentos en el detalle. Haz clic en
+                    <strong>Agregar documento</strong> para comenzar.
+                  </div>
+
+                  <hr />
+
+                  <!-- TOTAL -->
+                  <div class="row">
+                    <div class="col-lg-8">
+                      <div *ngIf="pagoMontoTotal && totalAplicado">
+                        <span
+                          [ngClass]="{
+                            'text-success': diffTotalPago <= 0.01,
+                            'text-danger': diffTotalPago > 0.01
+                          }"
+                        >
+                          Total aplicado:
+                          <strong>{{ totalAplicado | currency: 'Q' }}</strong>
+                          /
+                          Monto total pago:
+                          <strong>{{
+                            pagoMontoTotal || 0 | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 text-right">
+                      <h4>
+                        Total aplicado:
+                        <strong>{{ totalAplicado | currency: 'Q' }}</strong>
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="text-right">
+                  <button
+                    type="button"
+                    class="btn btn-secondary font-weight-bold mr-2"
+                    (click)="cancelar()"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    *ngIf="!saving"
+                    type="button"
+                    class="btn btn-primary font-weight-bold"
+                    (click)="guardarPago()"
+                  >
+                    Guardar Pago
+                  </button>
+
+                  <button
+                    *ngIf="saving"
+                    class="btn btn-primary font-weight-bold"
+                    type="button"
+                    disabled
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Guardando...
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

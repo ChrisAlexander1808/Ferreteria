@@ -1,0 +1,416 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <!--begin::Content-->
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Dashboard
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">
+                Visión general financiera
+              </span>
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <!-- Filtros -->
+            <div class="row mb-7">
+              <div class="col-lg-12">
+                <div class="card card-custom">
+                  <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                    <div class="card-title">
+                      <h3 class="card-label">
+                        Rendimiento
+                        <span class="text-muted pt-2 font-size-sm d-block">
+                          Seleccione año y mes para filtrar
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-lg-9 col-xl-8">
+                        <div class="row align-items-center">
+                          <div class="col-md-4 my-2 my-md-0">
+                            <div class="d-flex align-items-center">
+                              <label
+                                class="mr-3 mb-0 d-none d-md-block"
+                              >
+                                Año:
+                              </label>
+                              <select
+                                class="form-control"
+                                name="year"
+                                [(ngModel)]="year"
+                              >
+                                <option [ngValue]="year" disabled selected>
+                                  Seleccionar
+                                </option>
+                                <option [ngValue]="2024">2024</option>
+                                <option [ngValue]="2025">2025</option>
+                                <option [ngValue]="2026">2026</option>
+                                <option [ngValue]="2027">2027</option>
+                                <option [ngValue]="2028">2028</option>
+                                <option [ngValue]="2029">2029</option>
+                                <option [ngValue]="2030">2030</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="col-md-4 my-2 my-md-0">
+                            <div class="d-flex align-items-center">
+                              <label
+                                class="mr-3 mb-0 d-none d-md-block"
+                              >
+                                Mes:
+                              </label>
+                              <select
+                                class="form-control"
+                                name="month"
+                                [(ngModel)]="month"
+                              >
+                                <option value="ALL">Todo el año</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="col">
+                            <button
+                              class="btn btn-light-primary px-6 font-weight-bold mr-3"
+                              type="button"
+                              (click)="search()"
+                            >
+                              <i
+                                class="flaticon-search"
+                                style="padding-right: 0px"
+                              ></i>
+                            </button>
+
+                            <button
+                              class="btn btn-light-primary px-6 font-weight-bold"
+                              type="button"
+                              (click)="refresh()"
+                            >
+                              <i
+                                class="flaticon2-refresh-button"
+                                style="padding-right: 0px"
+                              ></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-lg-3 text-right" *ngIf="loading">
+                        <span class="spinner-border spinner-border-sm"></span>
+                        Cargando...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjetas resumen -->
+            <div class="row p-1" *ngIf="totales">
+              <div class="col-12 col-sm-6 col-xl-3 col-lg-3 col-md-3 p-3">
+                <div
+                  class="col-12"
+                  style="
+                    background-color: #6993ff;
+                    border-radius: 0.75em;
+                    border-bottom-right-radius: 2.75em;
+                    height: 85px;
+                    padding-top: 1em;
+                  "
+                >
+                  <div class="row">
+                    <div class="col-12">
+                      <h2 class="text-center" style="color: white">
+                        {{ totalVentas | currency: 'Q' }}
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <h5 class="text-center" style="color: white">
+                        Ventas totales
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-sm-6 col-xl-3 col-lg-3 col-md-3 p-3">
+                <div
+                  class="col-12"
+                  style="
+                    background-color: #ea6351;
+                    border-radius: 0.75em;
+                    border-bottom-right-radius: 2.75em;
+                    height: 85px;
+                    padding-top: 1em;
+                  "
+                >
+                  <div class="row">
+                    <div class="col-12">
+                      <h2 class="text-center" style="color: white">
+                        {{ totalCompras | currency: 'Q' }}
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <h5 class="text-center" style="color: white">
+                        Compras totales
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-sm-6 col-xl-3 col-lg-3 col-md-3 p-3">
+                <div
+                  class="col-12"
+                  style="
+                    background-color: #1bc5bd;
+                    border-radius: 0.75em;
+                    border-bottom-right-radius: 2.75em;
+                    height: 85px;
+                    padding-top: 1em;
+                  "
+                >
+                  <div class="row">
+                    <div class="col-12">
+                      <h2
+                        class="text-center"
+                        [ngStyle]="{
+                          color:
+                            (resultadoBruto ?? 0) >= 0 ? 'white' : '#f64e60'
+                        }"
+                      >
+                        {{ resultadoBruto | currency: 'Q' }}
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <h5 class="text-center" style="color: white">
+                        Resultado bruto (V - C)
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-sm-6 col-xl-3 col-lg-3 col-md-3 p-3">
+                <div
+                  class="col-12"
+                  style="
+                    background-color: #f9d407;
+                    border-radius: 0.75em;
+                    border-bottom-right-radius: 2.75em;
+                    height: 85px;
+                    padding-top: 1em;
+                  "
+                >
+                  <div class="row">
+                    <div class="col-12">
+                      <h2 class="text-center" style="color: white">
+                        {{ saldoCxC | currency: 'Q' }}
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <h5 class="text-center" style="color: white">
+                        Saldo CxC
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row: Ventas vs Compras / Flujo -->
+            <div class="row">
+              <div class="col-lg-6 mb-7">
+                <div class="card card-custom card-stretch gutter-b">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h3 class="card-label">
+                        Ventas vs Compras mensuales
+                        <span class="text-muted d-block font-size-sm">
+                          Comparativo por mes
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="card-body" id="content_chart_vc">
+                    <div
+                      *ngIf="!ventasComprasMensuales || ventasComprasMensuales.length === 0"
+                      class="text-center text-muted my-5"
+                    >
+                      Sin datos de ventas/compras para el periodo seleccionado.
+                    </div>
+                    <div
+                      id="chart_ventas_compras"
+                      class="d-flex justify-content-center"
+                      *ngIf="ventasComprasMensuales && ventasComprasMensuales.length > 0"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6 mb-7">
+                <div class="card card-custom card-stretch gutter-b">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h3 class="card-label">
+                        Flujo de efectivo
+                        <span class="text-muted d-block font-size-sm">
+                          Cobros vs Pagos (CxC / CxP)
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="card-body" id="content_chart_flujo">
+                    <div
+                      *ngIf="(!totalCobros && !totalPagos)"
+                      class="text-center text-muted my-5"
+                    >
+                      Sin movimientos de cobros/pagos en el periodo.
+                    </div>
+                    <div
+                      id="chart_flujo"
+                      class="d-flex justify-content-center"
+                      *ngIf="(totalCobros + totalPagos) > 0"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row: Ventas por tipo / Top productos -->
+            <div class="row">
+              <div class="col-lg-4 mb-7">
+                <div class="card card-custom card-stretch gutter-b">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h3 class="card-label">
+                        Ventas por tipo
+                        <span class="text-muted d-block font-size-sm">
+                          Contado vs Crédito
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div
+                      *ngIf="(!ventasContado && !ventasCredito)"
+                      class="text-center text-muted my-5"
+                    >
+                      No hay ventas registradas en el periodo.
+                    </div>
+                    <div
+                      id="chart_ventas_tipo"
+                      class="d-flex justify-content-center"
+                      *ngIf="(ventasContado + ventasCredito) > 0"
+                    ></div>
+
+                    <div class="mt-5" *ngIf="(ventasContado + ventasCredito) > 0">
+                      <div class="d-flex justify-content-between">
+                        <span>Contado</span>
+                        <strong>{{ ventasContado | currency: 'Q' }}</strong>
+                      </div>
+                      <div class="d-flex justify-content-between">
+                        <span>Crédito</span>
+                        <strong>{{ ventasCredito | currency: 'Q' }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-8 mb-7">
+                <div class="card card-custom card-stretch gutter-b">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <h3 class="card-label">
+                        Top productos más vendidos
+                        <span class="text-muted d-block font-size-sm">
+                          Cantidad y monto total de ventas
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div
+                      *ngIf="!topProductos || topProductos.length === 0"
+                      class="text-center text-muted my-5"
+                    >
+                      No hay productos con ventas para el periodo seleccionado.
+                    </div>
+
+                    <div class="table-responsive" *ngIf="topProductos && topProductos.length > 0">
+                      <table class="table table-head-custom table-vertical-center">
+                        <thead>
+                          <tr class="text-left">
+                            <th style="min-width: 60px">#</th>
+                            <th style="min-width: 200px">Producto</th>
+                            <th style="min-width: 120px">Cantidad</th>
+                            <th style="min-width: 140px">Total vendido</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let p of topProductos; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>{{ getNombreProducto(p) }}</td>
+                            <td>{{ p.cantidad }}</td>
+                            <td>{{ p.total | currency: 'Q' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+      <!--end::Content-->
+    </div>
+  </div>
+</div>

@@ -1,0 +1,171 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Roles
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4"
+                >Editar Rol</span
+              >
+              <a
+                [routerLink]="['/config/roles']"
+                class="btn btn-light-warning font-weight-bolder btn-sm"
+                >Regresar</a
+              >
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="card card-custom mb-7 w-75">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    Edición de rol y asignación de permisos en los módulos
+                  </h3>
+                </div>
+
+                <div *ngIf="load_rol" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <form class="form" *ngIf="!load_rol">
+                  <div class="card-body">
+                    <div class="form-group row mt-4">
+                      <label class="col-3 col-form-label"
+                        >Nombre del rol:</label
+                      >
+                      <div class="col-9">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Nombre del rol"
+                          name="nombre"
+                          [(ngModel)]="rol.nombre"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <label class="col-3 col-form-label"
+                        >Descripción:</label
+                      >
+                      <div class="col-9">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Descripción del rol"
+                          name="descripcion"
+                          [(ngModel)]="rol.descripcion"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-group row mb-1">
+                      <label class="col-3 col-form-label"
+                        >Módulos y Permisos:</label
+                      >
+                      <div
+                        class="col-9"
+                        style="max-height: 300px; overflow: auto"
+                      >
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th>Módulos</th>
+                              <th>Permisos</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let modulo of modulos">
+                              <td>{{ modulo.nombre }}</td>
+                              <td>
+                                <div
+                                  *ngFor="
+                                    let permiso of getPermisosByModulo(
+                                      modulo.id
+                                    )
+                                  "
+                                >
+                                  <label class="checkbox checkbox-outline">
+                                    <input
+                                      type="checkbox"
+                                      [checked]="
+                                        isPermissionSelected(
+                                          modulo.id,
+                                          permiso.id
+                                        )
+                                      "
+                                      (change)="
+                                        onPermissionChange(
+                                          $event,
+                                          modulo.id,
+                                          permiso.id
+                                        )
+                                      "
+                                    />
+                                    {{ permiso.clave }}
+                                    <span></span>
+                                  </label>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-footer">
+                    <div class="row">
+                      <div class="col-12 d-flex justify-content-center">
+                        <button
+                          type="button"
+                          class="btn btn-primary mr-2"
+                          (click)="save()"
+                        >
+                          Guardar cambios
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-secondary"
+                          (click)="cancelar()"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

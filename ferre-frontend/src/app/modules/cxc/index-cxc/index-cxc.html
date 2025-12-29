@@ -1,0 +1,621 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4"
+                >Cuentas por Cobrar</span
+              >
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom mb-7">
+              <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Cuentas por Cobrar
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Listado de documentos pendientes de cobro
+                    </span>
+                  </h3>
+                </div>
+                <div class="card-toolbar">
+                  <!-- Aquí podrías poner un botón para ver pagos -->
+                  <a
+                    [routerLink]="['/pagos']"
+                    class="btn btn-light-primary font-weight-bold"
+                  >
+                    <i class="la la-money-check"></i> Ver pagos
+                  </a>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Loader -->
+                <div *ngIf="load_data" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <div *ngIf="!load_data">
+                  <!-- Resúmenes -->
+                  <div class="row mb-6">
+                    <div class="col-md-3">
+                      <div class="p-4 bg-light-primary rounded-xl">
+                        <div class="text-muted font-weight-bold">
+                          Total documentos
+                        </div>
+                        <div class="h4 font-weight-bolder mb-0">
+                          {{ totalDocumentos }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="p-4 bg-light-warning rounded-xl">
+                        <div class="text-muted font-weight-bold">
+                          Saldo pendiente
+                        </div>
+                        <div class="h4 font-weight-bolder mb-0">
+                          {{ saldoPendienteTotal | currency: 'Q' }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="p-4 bg-light-danger rounded-xl">
+                        <div class="text-muted font-weight-bold">
+                          Documentos vencidos
+                        </div>
+                        <div class="h4 font-weight-bolder mb-0">
+                          {{ totalVencidas }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="p-4 bg-light-success rounded-xl">
+                        <div class="text-muted font-weight-bold">
+                          Documentos pagados
+                        </div>
+                        <div class="h4 font-weight-bolder mb-0">
+                          {{ totalPagadas }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Filtros -->
+                  <div class="mb-6">
+                    <div class="row align-items-center">
+                      <!-- Texto -->
+                      <div class="col-md-4 my-2 my-md-0">
+                        <div class="input-icon">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Buscar por cliente, NIT, No. doc"
+                            name="filtro_texto"
+                            [(ngModel)]="filtro_texto"
+                            (keyup)="filtrarTexto()"
+                          />
+                          <span>
+                            <i class="flaticon2-search-1 text-muted"></i>
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Cliente -->
+                      <div class="col-md-4 my-2 my-md-0">
+                        <ng-select
+                          [items]="clientes"
+                          bindLabel="nombre"
+                          bindValue="id"
+                          placeholder="Filtrar por cliente"
+                          [(ngModel)]="filtro_cliente_id"
+                          [searchable]="true"
+                          [clearable]="true"
+                          [searchFn]="clienteSearchFn"
+                          name="filtro_cliente"
+                          (change)="onChangeFiltros()"
+                        >
+                          <ng-template ng-option-tmp let-item="item">
+                            {{ item.nombre }}
+                            <span *ngIf="item.nit">
+                              - NIT: {{ item.nit }}
+                            </span>
+                          </ng-template>
+                        </ng-select>
+                      </div>
+
+                      <!-- Estado -->
+                      <div class="col-md-3 my-2 my-md-0">
+                        <select
+                          class="form-control"
+                          [(ngModel)]="filtro_estado"
+                          name="filtro_estado"
+                          (change)="onChangeFiltros()"
+                        >
+                          <option value="TODOS">Todos los estados</option>
+                          <option value="PENDIENTE">Pendiente</option>
+                          <option value="PARCIAL">Parcial</option>
+                          <option value="VENCIDA">Vencida</option>
+                          <option value="PAGADA">Pagada</option>
+                          <option value="ANULADA">Anulada</option>
+                        </select>
+                      </div>
+
+                      <!-- Limpiar -->
+                      <div class="col-md-1 text-right my-2 my-md-0">
+                        <button
+                          class="btn btn-light-warning btn-sm"
+                          type="button"
+                          (click)="limpiarFiltros()"
+                        >
+                          <i class="la la-undo"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tabla -->
+                  <div class="table-responsive">
+                    <table
+                      class="table table-head-custom table-vertical-center"
+                    >
+                      <thead>
+                        <tr class="text-left">
+                          <th style="min-width: 60px">ID</th>
+                          <th style="min-width: 220px">Cliente</th>
+                          <th style="min-width: 120px">Fecha Emisión</th>
+                          <th style="min-width: 120px">Vencimiento</th>
+                          <th style="min-width: 120px">Monto</th>
+                          <th style="min-width: 120px">Saldo</th>
+                          <th style="min-width: 110px">Estado</th>
+                          <th style="min-width: 130px" class="text-center">
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr
+                          *ngFor="
+                            let c of cxc_list
+                              | paginate
+                                : { itemsPerPage: pageSize, currentPage: page }
+                          "
+                        >
+                          <td>
+                            <span class="text-muted font-weight-bold">
+                              {{ c.id }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <div class="d-flex flex-column">
+                              <span class="text-dark-75 font-weight-bold">
+                                {{ c.cliente?.nombre || 'Sin cliente' }}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-sm">
+                              {{ c.fecha_emision | date: 'dd/MM/yyyy' }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-sm">
+                              {{
+                                c.fecha_vencimiento
+                                  ? (c.fecha_vencimiento
+                                    | date: 'dd/MM/yyyy')
+                                  : '-'
+                              }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-weight-bold">
+                              {{ c.monto_total | currency: 'Q' }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span
+                              class="text-dark-75 font-weight-bold"
+                              [ngClass]="{
+                                'text-danger':
+                                  c.estado === 'VENCIDA' &&
+                                  c.saldo_pendiente > 0
+                              }"
+                            >
+                              {{ c.saldo_pendiente | currency: 'Q' }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span
+                              class="label label-inline"
+                              [ngClass]="{
+                                'label-light-warning':
+                                  c.estado === 'PENDIENTE',
+                                'label-light-info': c.estado === 'PARCIAL',
+                                'label-light-danger': c.estado === 'VENCIDA',
+                                'label-light-success': c.estado === 'PAGADA',
+                                'label-light-dark': c.estado === 'ANULADA'
+                              }"
+                            >
+                              {{ c.estado }}
+                            </span>
+                          </td>
+
+                          <td class="text-center">
+
+                            <!-- Ver detalle -->
+                            <a
+                              style="cursor:pointer"
+                              class="mx-1"
+                              title="Ver detalle"
+                              (click)="ver_detalle(c)"
+                            >
+                              <i class="flaticon2-search text-primary"></i>
+                            </a>
+
+                            <!-- Registrar pago -->
+                             
+                            <button
+    *ngIf="
+      canCreatePago &&
+      c.saldo_pendiente > 0 &&
+      c.estado !== 'ANULADA'
+    "
+    type="button"
+    class="btn btn-clean btn-icon btn-sm"
+    title="Aplicar pago"
+    (click)="abrir_modal_pago(c)"
+  >
+    <i class="la la-money-bill text-success"></i>
+  </button>                                                 
+
+                          </td>
+
+                        </tr>
+
+                        <tr *ngIf="cxc_list.length === 0">
+                          <td colspan="8" class="text-center text-muted">
+                            No se encontraron cuentas por cobrar con los filtros
+                            seleccionados.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- ================================
+                    MODAL: DETALLE DE CxC
+                    =================================== -->
+                    <div
+                    class="modal fade"
+                    id="detalleCxcModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="detalleCxcLabel"
+                    aria-hidden="true"
+                    >
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                        <div class="modal-content">
+
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                            Detalle de Cuenta por Cobrar
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <!-- Loader -->
+                            <div *ngIf="loadingDetalle" class="text-center my-10">
+                            <div class="spinner-border" role="status"></div>
+                            </div>
+
+                            <div *ngIf="!loadingDetalle && detalleCxc">
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                <p><strong>Cliente:</strong> {{ detalleCxc.cliente?.nombre }}</p>
+                                <p><strong>NIT:</strong> {{ detalleCxc.cliente?.nit || 'CF' }}</p>
+                                <p><strong>Estado:</strong> {{ detalleCxc.estado }}</p>
+                                </div>
+
+                                <div class="col-md-6">
+                                <p><strong>Fecha emisión:</strong> {{ detalleCxc.fecha_emision | date : 'dd-MM-yyyy' }}</p>
+                                <p><strong>Fecha vencimiento:</strong> {{ detalleCxc.fecha_vencimiento | date : 'dd-MM-yyyy' }}</p>
+                                <p><strong>Total:</strong> {{ detalleCxc.monto_total | currency:'Q' }}</p>
+                                <p><strong>Pendiente:</strong> {{ detalleCxc.saldo_pendiente | currency:'Q' }}</p>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h5>Pagos aplicados</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                    <th># Pago</th>
+                                    <th>Fecha</th>
+                                    <th>Monto aplicado</th>
+                                    <th>Referencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of detalleCxc.pagos_aplicados">
+                                    <td>{{ p.pago?.id }}</td>
+                                    <td>{{ p.pago?.fecha_pago | date:'dd-MM-yyyy' }}</td>
+                                    <td>{{ p.monto_aplicado | currency:'Q' }}</td>
+                                    <td>{{ p.pago?.referencia || '-' }}</td>
+                                    </tr>
+                                    <tr *ngIf="detalleCxc.pagos_aplicados.length === 0">
+                                    <td colspan="3" class="text-center text-muted">
+                                        No hay pagos aplicados
+                                    </td>
+                                    </tr>
+                                </tbody>
+                                </table>
+                            </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        </div>
+
+                        </div>
+                    </div>
+                    </div>
+                    <!-- MODAL APLICAR PAGO -->
+                    <div
+                    class="modal fade"
+                    id="modalAplicarPago"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="modalAplicarPagoLabel"
+                    aria-hidden="true"
+                    >
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalAplicarPagoLabel">
+                            Aplicar pago a cuenta por cobrar
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <i aria-hidden="true" class="ki ki-close"></i>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div *ngIf="!cxcSeleccionadaParaPago">
+                            <p class="text-muted">No hay cuenta seleccionada.</p>
+                            </div>
+
+                            <div *ngIf="cxcSeleccionadaParaPago">
+                            <!-- Info de la CxC -->
+                            <div class="mb-4">
+                                <h6>
+                                Cliente:
+                                <strong>{{ cxcSeleccionadaParaPago.cliente?.nombre }}</strong>
+                                </h6>
+                                <p class="mb-1">
+                                Factura:
+                                <strong>{{ cxcSeleccionadaParaPago.venta?.numero_factura || 'N/A' }}</strong>
+                                </p>
+                                <p class="mb-1">
+                                Monto total:
+                                <strong>{{ cxcSeleccionadaParaPago.monto_total | currency:'Q' }}</strong>
+                                </p>
+                                <p class="mb-1">
+                                Saldo pendiente:
+                                <strong class="text-danger">
+                                    {{ cxcSeleccionadaParaPago.saldo_pendiente | currency:'Q' }}
+                                </strong>
+                                </p>
+                                <p class="mb-0">
+                                Estado:
+                                <span class="badge badge-info">
+                                    {{ cxcSeleccionadaParaPago.estado }}
+                                </span>
+                                </p>
+                            </div>
+
+                            <hr />
+
+                            <!-- Formulario de pago -->
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label">Fecha de pago</label>
+                                <div class="col-lg-9">
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    [(ngModel)]="pagoFecha"
+                                    name="pagoFecha"
+                                />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label">
+                                Método de pago <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-lg-9">
+                                <ng-select
+                                    [items]="metodosPago"
+                                    bindLabel="nombre"
+                                    bindValue="id"
+                                    placeholder="Seleccione método de pago"
+                                    [(ngModel)]="pagoMetodoId"
+                                    name="pagoMetodoId"
+                                    [clearable]="true"
+                                    class="w-100"
+                                >
+                                    <ng-template ng-option-tmp let-item="item">
+                                    {{ item.nombre }}
+                                    <span *ngIf="item.descripcion"> - {{ item.descripcion }}</span>
+                                    </ng-template>
+                                </ng-select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                            <label class="col-lg-3 col-form-label">
+                                Monto a pagar <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="col-lg-9">
+                                <input
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                class="form-control"
+                                [(ngModel)]="pagoMonto"
+                                name="pagoMonto"
+                                [ngClass]="{
+                                    'is-invalid': pagoMonto > saldoPendienteSeleccionado,
+                                    'is-valid': pagoMonto > 0 && pagoMonto <= saldoPendienteSeleccionado
+                                }"
+                                />
+
+                                <!-- Mensaje de error -->
+                                <div
+                                class="invalid-feedback d-block"
+                                *ngIf="pagoMonto > saldoPendienteSeleccionado"
+                                >
+                                El monto no puede ser mayor al saldo pendiente
+                                ({{ saldoPendienteSeleccionado | number:'1.2-2' }}).
+                                </div>
+
+                                <small
+                                class="form-text text-muted"
+                                *ngIf="pagoMonto <= saldoPendienteSeleccionado"
+                                >
+                                No puede ser mayor al saldo pendiente.
+                                </small>
+                            </div>
+                            </div>
+
+
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label">Referencia</label>
+                                <div class="col-lg-9">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    [(ngModel)]="pagoReferencia"
+                                    name="pagoReferencia"
+                                    placeholder="Ej: No. boleta, No. transferencia..."
+                                />
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label">Observación</label>
+                                <div class="col-lg-9">
+                                <textarea
+                                    class="form-control"
+                                    rows="2"
+                                    [(ngModel)]="pagoObservacion"
+                                    name="pagoObservacion"
+                                    placeholder="Comentarios sobre el pago"
+                                ></textarea>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                            [disabled]="loadingPago"
+                            >
+                            Cerrar
+                            </button>
+
+                            <button
+                            *ngIf="!loadingPago"
+                            type="button"
+                            class="btn btn-primary"
+                            (click)="aplicarPago()"
+                            [disabled]="!cxcSeleccionadaParaPago"
+                            >
+                            Aplicar pago
+                            </button>
+
+                            <button
+                            *ngIf="loadingPago"
+                            class="btn btn-primary"
+                            type="button"
+                            disabled
+                            >
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Guardando...
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+
+                  <!-- Paginación -->
+                  <div class="card-footer text-center" *ngIf="cxc_list.length">
+                    <pagination-controls
+                      (pageChange)="page = $event"
+                      previousLabel="«"
+                      nextLabel="»"
+                      [directionLinks]="true"
+                      [autoHide]="false"
+                    >
+                    </pagination-controls>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>
+

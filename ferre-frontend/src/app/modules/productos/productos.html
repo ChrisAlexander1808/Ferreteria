@@ -1,0 +1,773 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div
+          class="subheader py-2 py-lg-4 subheader-solid"
+          id="kt_subheader"
+        >
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4"
+                >#XRS-45670</span
+              >
+              <a
+                [routerLink]="['/dashboard']"
+                class="btn btn-light-warning font-weight-bolder btn-sm"
+                >Refrescar</a
+              >
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom mb-7">
+              <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Productos
+                    <span
+                      class="text-muted pt-2 font-size-sm d-block"
+                      >Listado de productos de la empresa</span
+                    >
+                  </h3>
+                </div>
+                <div class="card-toolbar">
+                  <a
+                    *ngIf="canCreate"
+                    data-toggle="modal"
+                    data-target="#modalCreateProducto"
+                    class="btn btn-light-success btn-sm font-weight-bold font-size-sm"
+                    (click)="openCreateModal()"
+                  >
+                    <i class="flaticon-add-circular-button"></i>
+                    Nuevo Producto
+                  </a>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Filtro -->
+                <div class="mb-11">
+                  <div class="row align-items-center">
+                    <div class="col-lg-9 col-xl-10">
+                      <div class="row align-items-center">
+                        <div class="col-md-4 my-2 my-md-0">
+                          <div class="input-icon">
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Nombre, código o categoría"
+                              name="filtro_producto"
+                              [(ngModel)]="filtro_producto"
+                              (keyup)="filtrar()"
+                            />
+                            <span>
+                              <i
+                                class="flaticon2-search-1 text-muted"
+                              ></i>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-responsive">
+                  <table
+                    class="table table-head-custom table-vertical-center"
+                    id="kt_advance_table_widget_4"
+                  >
+                    <thead>
+                      <tr class="text-left">
+                        <th style="min-width: 50px">ID</th>
+                        <th style="min-width: 100px">Código</th>
+                        <th style="min-width: 150px">Nombre</th>
+                        <th style="min-width: 150px">Categoría</th>
+                        <th style="min-width: 120px">Precio Compra</th>
+                        <th style="min-width: 120px">Precio Venta</th>
+                        <th style="min-width: 100px; text-align: center">
+                          Stock
+                        </th>
+                        <th style="min-width: 100px; text-align: center">
+                          Unidad
+                        </th>
+                        <th
+                          *ngIf="canUpdate || canDelete"
+                          class="pr-0 text-center"
+                          style="min-width: 10px"
+                        >
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <!-- Loading -->
+                    <ng-container *ngIf="load_data">
+                      <tr>
+                        <td colspan="10" class="text-center">
+                          <div
+                            class="spinner-border"
+                            style="width: 3rem; height: 3rem"
+                            role="status"
+                          >
+                            <span class="sr-only">Cargando...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+
+                    <!-- Datos -->
+                    <ng-container *ngIf="!load_data">
+                      <tbody>
+                        <tr
+                          *ngFor="
+                            let item of productos
+                              | paginate
+                                : { itemsPerPage: pageSize, currentPage: page }
+                          "
+                        >
+                          <td>
+                            <span class="text-muted font-weight-bold d-block">
+                              {{ item.id }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.codigo }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.nombre }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.categoria?.nombre }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.precio_compra | currency: 'Q' }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.precio_venta | currency: 'Q' }}
+                            </span>
+                          </td>
+
+                          <td style="text-align: center">
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.stock_actual }}
+                            </span>
+                          </td>
+
+                          <td style="text-align: center">
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.unidad_medida }}
+                            </span>
+                          </td>
+
+                          <td
+                            *ngIf="canUpdate || canDelete"
+                            class="pr-0 text-center"
+                          >
+                            <!-- Kardex -->
+                            <a
+                              style="cursor: pointer; margin-right: 10px"
+                              title="Ver Kardex"
+                              (click)="verKardex(item)"
+                            >
+                              <i class="flaticon2-list-2 text-info"></i>
+                            </a>
+                            <!-- Editar -->
+                            <a
+                              *ngIf="canUpdate && item.stock_actual === 0"
+                              style="cursor: pointer; margin-right: 10px"
+                              (click)="openEditModal(item.id)"
+                            >
+                              <i
+                                class="icon-1x text-dark-50 fas fa-edit"
+                              ></i>
+                            </a>
+                            <!-- Eliminar -->
+                            <a
+                              *ngIf="canDelete && item.stock_actual === 0"        
+                              style="cursor: pointer"
+                              data-toggle="modal"
+                              [attr.data-target]="'#delete-' + item.id"
+                            >
+                              <i
+                                class="icon-1x text-dark-50 fas fa-trash-alt"
+                              ></i>
+                            </a>
+
+                            <!-- Modal delete -->
+                            <div
+                              class="modal fade"
+                              id="delete-{{ item.id }}"
+                              tabindex="-1"
+                              role="dialog"
+                              aria-labelledby="exampleModalLabel"
+                              aria-hidden="true"
+                            >
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5
+                                      class="modal-title"
+                                      id="exampleModalLabel"
+                                    >
+                                      Eliminación de Producto
+                                    </h5>
+                                    <button
+                                      type="button"
+                                      class="close"
+                                      data-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <i
+                                        aria-hidden="true"
+                                        class="ki ki-close"
+                                      ></i>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>
+                                      ¿Desea deshabilitar el producto
+                                      <strong>{{ item.nombre }}</strong
+                                      >?
+                                    </p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      type="button"
+                                      class="btn btn-warning font-weight-bold"
+                                      data-dismiss="modal"
+                                    >
+                                      Cerrar
+                                    </button>
+
+                                    <button
+                                      *ngIf="load_delete"
+                                      type="button"
+                                      class="btn btn-danger font-weight-bold"
+                                      (click)="eliminar_producto(item.id)"
+                                    >
+                                      Eliminar
+                                    </button>
+
+                                    <button
+                                      *ngIf="!load_delete"
+                                      class="btn btn-danger"
+                                      type="button"
+                                      disabled
+                                    >
+                                      <span
+                                        class="spinner-border spinner-border-sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                      ></span>
+                                      Enviando...
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ng-container>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card-footer text-center">
+                <pagination-controls
+                  (pageChange)="page = $event"
+                  previousLabel="«"
+                  nextLabel="»"
+                  [directionLinks]="true"
+                  [autoHide]="false"
+                >
+                </pagination-controls>
+              </div>
+            </div>
+
+            <!-- MODAL: NUEVO PRODUCTO -->
+            <div
+              class="modal fade"
+              id="modalCreateProducto"
+              tabindex="-1"
+              aria-labelledby="modalCreateProductoLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered"
+                role="document"
+                style="max-width: 700px"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="modalCreateProductoLabel"
+                    >
+                      Nuevo Producto
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <h3
+                      class="font-size-lg text-dark font-weight-bold mb-6"
+                    >
+                      Ingrese los siguientes datos:
+                    </h3>
+
+                    <div>
+                      <!-- Nombre -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Nombre <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Nombre del producto"
+                            name="nombre"
+                            [(ngModel)]="createProducto.nombre"
+                            (input)="onCategoriaOrNombreChange()"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Categoría -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Categoría
+                          <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <select
+                            class="form-control"
+                            name="categoria_id"
+                            [(ngModel)]="createProducto.categoria_id"
+                            (change)="onCategoriaOrNombreChange()"
+                          >
+                            <option value="" disabled selected>
+                              Seleccione categoría
+                            </option>
+                            <option
+                              *ngFor="let c of categorias"
+                              [value]="c.id"
+                            >
+                              {{ c.nombre }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- Código -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Código <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Código del producto"
+                            name="codigo"
+                            [(ngModel)]="createProducto.codigo"
+                            readonly
+                          />
+                          <small class="form-text text-muted">
+                            Se genera automáticamente según categoría + nombre + correlativo.
+                          </small>
+                          <small class="form-text text-muted" *ngIf="generandoCodigo">
+                            Generando código...
+                          </small>
+                        </div>
+                      </div>
+
+                      <!-- Descripción -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Descripción</label
+                        >
+                        <div class="col-lg-9">
+                          <textarea
+                            class="form-control"
+                            rows="2"
+                            placeholder="Descripción del producto"
+                            name="descripcion"
+                            [(ngModel)]="createProducto.descripcion"
+                          ></textarea>
+                        </div>
+                      </div>
+
+                      <!-- Precios -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Precio Compra</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0.00"
+                            name="precio_compra"
+                            [(ngModel)]="createProducto.precio_compra"
+                          />
+                        </div>
+
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Precio Venta</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0.00"
+                            name="precio_venta"
+                            [(ngModel)]="createProducto.precio_venta"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Stock & unidad -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Stock Inicial</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0"
+                            name="stock_actual"
+                            [(ngModel)]="createProducto.stock_actual"
+                          />
+                        </div>
+
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Unidad</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ej: Unidad, Caja, Metro"
+                            name="unidad_medida"
+                            [(ngModel)]="createProducto.unidad_medida"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary font-weight-bold"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+
+                    <button
+                      *ngIf="load_producto"
+                      type="button"
+                      class="btn btn-primary font-weight-bold"
+                      (click)="save_create_producto()"
+                    >
+                      Ingresar
+                    </button>
+
+                    <button
+                      *ngIf="!load_producto"
+                      class="btn btn-primary font-weight-bold"
+                      type="button"
+                      disabled
+                    >
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Ingresando...
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL: ACTUALIZAR PRODUCTO -->
+            <div
+              class="modal fade"
+              id="modalUpdateProducto"
+              tabindex="-1"
+              aria-labelledby="modalUpdateProductoLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered"
+                role="document"
+                style="max-width: 700px"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="modalUpdateProductoLabel"
+                    >
+                      Actualización de Producto
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <h3
+                      class="font-size-lg text-dark font-weight-bold mb-6"
+                    >
+                      Modifique los datos necesarios:
+                    </h3>
+
+                    <div>
+                      <!-- Nombre -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Nombre <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Nombre del producto"
+                            name="nombre"
+                            [(ngModel)]="updateProducto.nombre"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Código -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Código <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Código del producto"
+                            name="codigo"
+                            [(ngModel)]="updateProducto.codigo"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Categoría -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Categoría
+                          <span style="color: red">*</span></label
+                        >
+                        <div class="col-lg-9">
+                          <select
+                            class="form-control"
+                            name="categoria_id"
+                            [(ngModel)]="updateProducto.categoria_id"
+                          >
+                            <option value="" disabled selected>
+                              Seleccione categoría
+                            </option>
+                            <option
+                              *ngFor="let c of categorias"
+                              [value]="c.id"
+                            >
+                              {{ c.nombre }}
+                            </option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <!-- Descripción -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Descripción</label
+                        >
+                        <div class="col-lg-9">
+                          <textarea
+                            class="form-control"
+                            rows="2"
+                            placeholder="Descripción del producto"
+                            name="descripcion"
+                            [(ngModel)]="updateProducto.descripcion"
+                          ></textarea>
+                        </div>
+                      </div>
+
+                      <!-- Precios -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Precio Compra</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0.00"
+                            name="precio_compra"
+                            [(ngModel)]="updateProducto.precio_compra"
+                          />
+                        </div>
+
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Precio Venta</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0.00"
+                            name="precio_venta"
+                            [(ngModel)]="updateProducto.precio_venta"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Stock & unidad -->
+                      <div class="form-group row">
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Stock Actual</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            placeholder="0"
+                            name="stock_actual"
+                            [(ngModel)]="updateProducto.stock_actual"
+                          />
+                        </div>
+
+                        <label
+                          class="col-lg-3 col-form-label text-left"
+                          >Unidad</label
+                        >
+                        <div class="col-lg-3">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ej: Unidad, Caja, Metro"
+                            name="unidad_medida"
+                            [(ngModel)]="updateProducto.unidad_medida"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary font-weight-bold"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+
+                    <button
+                      *ngIf="load_update"
+                      type="button"
+                      class="btn btn-primary font-weight-bold"
+                      (click)="actualizar()"
+                    >
+                      Actualizar
+                    </button>
+
+                    <button
+                      *ngIf="!load_update"
+                      class="btn btn-primary font-weight-bold"
+                      type="button"
+                      disabled
+                    >
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Actualizando...
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- fin modales -->
+          </div>
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

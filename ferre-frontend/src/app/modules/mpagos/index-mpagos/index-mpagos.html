@@ -1,0 +1,525 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4"
+                >Métodos de Pago</span
+              >
+              <a
+                [routerLink]="['/pagos/metodos']"
+                class="btn btn-light-warning font-weight-bolder btn-sm"
+                >Refrescar</a
+              >
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom mb-7">
+              <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Métodos de Pago
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Listado de métodos de pago configurados en la empresa
+                    </span>
+                  </h3>
+                </div>
+
+                <div class="card-toolbar">
+                  <a
+                    *ngIf="canCreate"
+                    class="btn btn-light-success btn-sm font-weight-bold font-size-sm"
+                    data-toggle="modal"
+                    data-target="#modalCreateMetodo"
+                    (click)="openCreateModal()"
+                  >
+                    <i class="flaticon-add-circular-button"></i>
+                    Nuevo Método
+                  </a>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Filtro -->
+                <div class="mb-11">
+                  <div class="row align-items-center">
+                    <div class="col-lg-9 col-xl-10">
+                      <div class="row align-items-center">
+                        <div class="col-md-4 my-2 my-md-0">
+                          <div class="input-icon">
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Nombre o descripción del método"
+                              name="filtro_metodo"
+                              [(ngModel)]="filtro_metodo"
+                              (keyup)="filtrar()"
+                            />
+                            <span>
+                              <i class="flaticon2-search-1 text-muted"></i>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-responsive">
+                  <table
+                    class="table table-head-custom table-vertical-center"
+                    id="kt_advance_table_widget_4"
+                  >
+                    <thead>
+                      <tr class="text-left">
+                        <th style="min-width: 50px">ID</th>
+                        <th style="min-width: 200px">Nombre</th>
+                        <th style="min-width: 250px">Descripción</th>
+                        <th style="min-width: 100px">Estado</th>
+                        <th
+                          *ngIf="canUpdate || canDelete"
+                          class="pr-0 text-center"
+                          style="min-width: 10px"
+                        >
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <!-- Loader -->
+                    <ng-container *ngIf="load_data">
+                      <tr>
+                        <td colspan="11" class="text-center">
+                          <div
+                            class="spinner-border"
+                            style="width: 3rem; height: 3rem"
+                            role="status"
+                          >
+                            <span class="sr-only">Cargando...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+
+                    <!-- Data -->
+                    <ng-container *ngIf="!load_data">
+                      <tbody>
+                        <tr
+                          *ngFor="
+                            let item of metodos
+                              | paginate: { itemsPerPage: pageSize, currentPage: page }
+                          "
+                        >
+                          <td>
+                            <span class="text-muted font-weight-bold d-block">{{
+                              item.id
+                            }}</span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.nombre }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.descripcion }}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span
+                              class="label label-inline"
+                              [ngClass]="{
+                                'label-success': item.activo,
+                                'label-danger': !item.activo
+                              }"
+                            >
+                              {{ item.activo ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                          </td>
+
+                          <td
+                            *ngIf="canUpdate || canDelete"
+                            class="pr-0 text-center"
+                          >
+                            <a
+                              *ngIf="canUpdate"
+                              style="cursor: pointer; margin-right: 10px"
+                              (click)="openEditModal(item.id)"
+                            >
+                              <i class="icon-1x text-dark-50 fas fa-edit"></i>
+                            </a>
+
+                            <a
+                              *ngIf="canDelete"
+                              style="cursor: pointer"
+                              data-toggle="modal"
+                              [attr.data-target]="'#delete-' + item.id"
+                            >
+                              <i
+                                class="icon-1x text-dark-50 fas fa-trash-alt"
+                              ></i>
+                            </a>
+
+                            <!-- Modal delete -->
+                            <div
+                              class="modal fade"
+                              id="delete-{{ item.id }}"
+                              tabindex="-1"
+                              role="dialog"
+                              aria-labelledby="deleteMetodoLabel"
+                              aria-hidden="true"
+                            >
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5
+                                      class="modal-title"
+                                      id="deleteMetodoLabel"
+                                    >
+                                      Deshabilitar Método de Pago
+                                    </h5>
+                                    <button
+                                      type="button"
+                                      class="close"
+                                      data-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <i
+                                        aria-hidden="true"
+                                        class="ki ki-close"
+                                      ></i>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>
+                                      ¿Desea deshabilitar el método de pago
+                                      <strong>{{ item.nombre }}</strong>?
+                                    </p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      type="button"
+                                      class="btn btn-warning font-weight-bold"
+                                      data-dismiss="modal"
+                                    >
+                                      Cerrar
+                                    </button>
+
+                                    <button
+                                      *ngIf="load_delete"
+                                      type="button"
+                                      class="btn btn-danger font-weight-bold"
+                                      (click)="eliminar_metodo(item.id)"
+                                    >
+                                      Deshabilitar
+                                    </button>
+
+                                    <button
+                                      *ngIf="!load_delete"
+                                      class="btn btn-danger"
+                                      type="button"
+                                      disabled
+                                    >
+                                      <span
+                                        class="spinner-border spinner-border-sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                      ></span>
+                                      Procesando...
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ng-container>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Paginación -->
+              <div class="card-footer text-center">
+                <pagination-controls
+                  (pageChange)="page = $event"
+                  previousLabel="«"
+                  nextLabel="»"
+                  [directionLinks]="true"
+                  [autoHide]="false"
+                >
+                </pagination-controls>
+              </div>
+            </div>
+
+            <!-- MODAL CREAR -->
+            <div
+              class="modal fade"
+              id="modalCreateMetodo"
+              tabindex="-1"
+              aria-labelledby="modalCreateMetodoLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered"
+                role="document"
+                style="max-width: 600px"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalCreateMetodoLabel">
+                      Nuevo Método de Pago
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                      Ingrese los siguientes datos:
+                    </h3>
+
+                    <div class="">
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Nombre <span style="color: red">*</span>
+                        </label>
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ej: Efectivo, Transferencia, Tarjeta"
+                            name="nombre"
+                            [(ngModel)]="createMetodo.nombre"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Descripción
+                        </label>
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Detalle opcional"
+                            name="descripcion"
+                            [(ngModel)]="createMetodo.descripcion"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Activo
+                        </label>
+                        <div class="col-lg-9">
+                          <span class="switch switch-outline switch-icon">
+                            <label>
+                              <input
+                                type="checkbox"
+                                [(ngModel)]="createMetodo.activo"
+                                name="activo_create"
+                              />
+                              <span></span>
+                            </label>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary font-weight-bold"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+
+                    <button
+                      *ngIf="load_create"
+                      type="button"
+                      (click)="save_create_metodo()"
+                      class="btn btn-primary font-weight-bold"
+                    >
+                      Ingresar
+                    </button>
+
+                    <button
+                      *ngIf="!load_create"
+                      class="btn btn-primary font-weight-bold"
+                      type="button"
+                      disabled
+                    >
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Guardando...
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL EDITAR -->
+            <div
+              class="modal fade"
+              id="modalUpdateMetodo"
+              tabindex="-1"
+              aria-labelledby="modalUpdateMetodoLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered"
+                role="document"
+                style="max-width: 600px"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalUpdateMetodoLabel">
+                      Actualizar Método de Pago
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                      Actualice los siguientes datos:
+                    </h3>
+
+                    <div class="">
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Nombre <span style="color: red">*</span>
+                        </label>
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Ej: Efectivo, Transferencia, Tarjeta"
+                            name="nombre_update"
+                            [(ngModel)]="updateMetodo.nombre"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Descripción
+                        </label>
+                        <div class="col-lg-9">
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Detalle opcional"
+                            name="descripcion_update"
+                            [(ngModel)]="updateMetodo.descripcion"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-left">
+                          Activo
+                        </label>
+                        <div class="col-lg-9">
+                          <span class="switch switch-outline switch-icon">
+                            <label>
+                              <input
+                                type="checkbox"
+                                [(ngModel)]="updateMetodo.activo"
+                                name="activo_update"
+                              />
+                              <span></span>
+                            </label>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary font-weight-bold"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+
+                    <button
+                      *ngIf="load_update"
+                      type="button"
+                      (click)="actualizar_metodo()"
+                      class="btn btn-primary font-weight-bold"
+                    >
+                      Actualizar
+                    </button>
+
+                    <button
+                      *ngIf="!load_update"
+                      class="btn btn-primary font-weight-bold"
+                      type="button"
+                      disabled
+                    >
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Actualizando...
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- FIN MODALES -->
+          </div>
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

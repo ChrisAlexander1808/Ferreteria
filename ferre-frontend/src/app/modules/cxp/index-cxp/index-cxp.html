@@ -1,0 +1,492 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">
+                Cuentas por Pagar
+              </span>
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Cuentas por Pagar
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Proveedores con saldos pendientes, parciales, pagados o vencidos
+                    </span>
+                  </h3>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Loader -->
+                <div *ngIf="load_data" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <div *ngIf="!load_data">
+                  <!-- Filtros -->
+                  <div class="form-group row">
+                    <div class="col-lg-4">
+                      <label>Proveedor / NIT</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Buscar por nombre de proveedor o NIT"
+                        [(ngModel)]="filtroProveedor"
+                        (keyup)="onChangeFiltroProveedor()"
+                      />
+                    </div>
+
+                    <div class="col-lg-4">
+                      <label>Fecha desde</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_desde"
+                        (change)="onChangeFechas()"
+                      />
+                    </div>
+
+                    <div class="col-lg-4">
+                      <label>Fecha hasta</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_hasta"
+                        (change)="onChangeFechas()"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <div class="col-lg-12">
+                      <label>Estado</label>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <button
+                          type="button"
+                          class="btn"
+                          [ngClass]="{
+                            'btn-primary': estadoFiltro === 'TODOS',
+                            'btn-outline-primary': estadoFiltro !== 'TODOS'
+                          }"
+                          (click)="onChangeEstado('TODOS')"
+                        >
+                          Todos
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn ml-1"
+                          [ngClass]="{
+                            'btn-warning': estadoFiltro === 'PENDIENTE',
+                            'btn-outline-warning': estadoFiltro !== 'PENDIENTE'
+                          }"
+                          (click)="onChangeEstado('PENDIENTE')"
+                        >
+                          Pendientes
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn ml-1"
+                          [ngClass]="{
+                            'btn-info': estadoFiltro === 'PARCIAL',
+                            'btn-outline-info': estadoFiltro !== 'PARCIAL'
+                          }"
+                          (click)="onChangeEstado('PARCIAL')"
+                        >
+                          Parciales
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn ml-1"
+                          [ngClass]="{
+                            'btn-success': estadoFiltro === 'PAGADA',
+                            'btn-outline-success': estadoFiltro !== 'PAGADA'
+                          }"
+                          (click)="onChangeEstado('PAGADA')"
+                        >
+                          Pagadas
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn ml-1"
+                          [ngClass]="{
+                            'btn-danger': estadoFiltro === 'VENCIDA',
+                            'btn-outline-danger': estadoFiltro !== 'VENCIDA'
+                          }"
+                          (click)="onChangeEstado('VENCIDA')"
+                        >
+                          Vencidas
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr />
+
+                  <!-- Resumen -->
+                  <div class="row mb-5">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card card-custom bg-light-warning">
+                        <div class="card-body py-3">
+                          <span class="font-weight-bold d-block">
+                            Pendientes
+                          </span>
+                          <span class="d-block">
+                            {{ resumen.pendientes_count }} docs
+                          </span>
+                          <span class="font-weight-bolder">
+                            {{ resumen.pendientes_monto | currency: 'Q' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card card-custom bg-light-info">
+                        <div class="card-body py-3">
+                          <span class="font-weight-bold d-block">
+                            Parciales
+                          </span>
+                          <span class="d-block">
+                            {{ resumen.parciales_count }} docs
+                          </span>
+                          <span class="font-weight-bolder">
+                            {{ resumen.parciales_monto | currency: 'Q' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card card-custom bg-light-success">
+                        <div class="card-body py-3">
+                          <span class="font-weight-bold d-block">
+                            Pagadas
+                          </span>
+                          <span class="d-block">
+                            {{ resumen.pagadas_count }} docs
+                          </span>
+                          <span class="font-weight-bolder">
+                            {{ resumen.pagadas_monto | currency: 'Q' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-3">
+                      <div class="card card-custom bg-light-danger">
+                        <div class="card-body py-3">
+                          <span class="font-weight-bold d-block">
+                            Vencidas
+                          </span>
+                          <span class="d-block">
+                            {{ resumen.vencidas_count }} docs
+                          </span>
+                          <span class="font-weight-bolder">
+                            {{ resumen.vencidas_monto | currency: 'Q' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tabla -->
+                  <div class="table-responsive">
+                    <table
+                      class="table table-head-custom table-vertical-center"
+                    >
+                      <thead>
+                        <tr class="text-left">
+                          <th style="min-width: 100px">#</th>
+                          <th style="min-width: 110px">Fecha emisión</th>
+                          <th style="min-width: 180px">Proveedor</th>
+                          <th style="min-width: 120px">NIT</th>
+                          <th style="min-width: 140px">Documento</th>
+                          <th style="min-width: 120px">Total</th>
+                          <th style="min-width: 140px">Saldo pendiente</th>
+                          <th style="min-width: 100px">Estado</th>
+                          <th style="min-width: 80px">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let c of cxpFiltradas">
+                          <td>
+                            {{ c.id }}
+                          </td>
+                          <td>
+                            {{ c.fecha_emision | date: 'yyyy-MM-dd' }}
+                          </td>
+                          <td>
+                            {{ c.proveedor?.nombre || 'N/A' }}
+                          </td>
+                          <td>
+                            {{ c.proveedor?.nit || 'CF' }}
+                          </td>
+                          <td>
+                            {{
+                              c.compra?.numero_factura || ('COMP-' + c.compra_id)
+                            }}
+                          </td>
+                          <td>
+                            {{ c.monto_total | currency: 'Q' }}
+                          </td>
+                          <td>
+                            <strong>
+                              {{ c.saldo_pendiente | currency: 'Q' }}
+                            </strong>
+                          </td>
+                          <td>
+                            <span [ngClass]="getEstadoBadgeClass(c.estado)">
+                              {{ c.estado }}
+                            </span>
+                          </td>
+                          <td>
+                            <a
+                              style="cursor: pointer"
+                              class="text-primary"
+                              (click)="ver_detalle(c)"
+                            >
+                              <i class="flaticon2-search"></i>
+                            </a>
+                          </td>
+                        </tr>
+
+                        <tr *ngIf="cxpFiltradas.length === 0">
+                          <td colspan="9" class="text-center text-muted">
+                            No se encontraron cuentas por pagar para los filtros
+                            seleccionados.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modal detalle CxP -->
+              <div
+                class="modal fade"
+                tabindex="-1"
+                role="dialog"
+                id="detalleCxpModal"
+              >
+                <div class="modal-dialog modal-xl" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">
+                        Detalle de Cuenta por Pagar
+                      </h5>
+                      <button
+                        type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+
+                    <div class="modal-body">
+                      <div *ngIf="loadingDetalle" class="text-center my-10">
+                        <div
+                          class="spinner-border"
+                          style="width: 3rem; height: 3rem"
+                          role="status"
+                        >
+                          <span class="sr-only">Cargando...</span>
+                        </div>
+                      </div>
+
+                      <div *ngIf="!loadingDetalle && detalleCxp">
+                        <!-- Info principal -->
+                        <div class="row mb-4">
+                          <div class="col-lg-6">
+                            <h5>Proveedor</h5>
+                            <p class="mb-1">
+                              <strong>Nombre:</strong>
+                              {{ detalleCxp.proveedor?.nombre || 'N/A' }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>NIT:</strong>
+                              {{ detalleCxp.proveedor?.nit || 'CF' }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>Estado:</strong>
+                              <span
+                                [ngClass]="getEstadoBadgeClass(detalleCxp.estado)"
+                              >
+                                {{ detalleCxp.estado }}
+                              </span>
+                            </p>
+                          </div>
+
+                          <div class="col-lg-6">
+                            <h5>Documento</h5>
+                            <p class="mb-1">
+                              <strong>Fecha emisión:</strong>
+                              {{
+                                detalleCxp.fecha_emision
+                                  | date: 'yyyy-MM-dd'
+                              }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>Fecha vencimiento:</strong>
+                              {{
+                                detalleCxp.fecha_vencimiento
+                                  | date: 'yyyy-MM-dd'
+                              }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>Compra / Factura:</strong>
+                              {{
+                                detalleCxp.compra?.numero_factura
+                                  ? detalleCxp.compra.numero_factura
+                                  : ('COMP-' + detalleCxp.compra_id)
+                              }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>Total:</strong>
+                              {{
+                                detalleCxp.monto_total | currency: 'Q'
+                              }}
+                            </p>
+                            <p class="mb-1">
+                              <strong>Pendiente:</strong>
+                              {{
+                                detalleCxp.saldo_pendiente | currency: 'Q'
+                              }}
+                            </p>
+                          </div>
+                        </div>
+
+                        <hr />
+
+                        <h5 class="mb-3">Pagos aplicados</h5>
+
+                        <div class="table-responsive">
+                          <table
+                            class="table table-head-custom table-vertical-center"
+                          >
+                            <thead>
+                              <tr class="text-left">
+                                <th style="min-width: 80px">ID Pago</th>
+                                <th style="min-width: 110px">Fecha pago</th>
+                                <th style="min-width: 140px">Referencia</th>
+                                <th style="min-width: 120px">Estado pago</th>
+                                <th style="min-width: 140px">Monto aplicado</th>
+                                <th style="min-width: 180px">Observación</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                *ngFor="
+                                  let d of (detalleCxp.pagos_aplicados || [])
+                                "
+                              >
+                                <td>
+                                  {{ d.pago?.id || 'N/A' }}
+                                </td>
+                                <td>
+                                  {{
+                                    d.pago?.fecha_pago
+                                      | date: 'yyyy-MM-dd'
+                                  }}
+                                </td>
+                                <td>
+                                  {{ d.pago?.referencia || '-' }}
+                                </td>
+                                <td>
+                                  <span
+                                    class="badge badge-pill"
+                                    [ngClass]="{
+                                      'badge-success':
+                                        d.pago?.estado === 'REGISTRADO',
+                                      'badge-dark':
+                                        d.pago?.estado === 'ANULADO'
+                                    }"
+                                  >
+                                    {{ d.pago?.estado || '-' }}
+                                  </span>
+                                </td>
+                                <td>
+                                  {{
+                                    d.monto_aplicado | currency: 'Q'
+                                  }}
+                                </td>
+                                <td>
+                                  {{ d.observacion || d.pago?.observacion || '-' }}
+                                </td>
+                              </tr>
+
+                              <tr
+                                *ngIf="
+                                  !detalleCxp.pagos_aplicados ||
+                                  detalleCxp.pagos_aplicados.length === 0
+                                "
+                              >
+                                <td colspan="6" class="text-center text-muted">
+                                  Esta cuenta por pagar no tiene pagos
+                                  aplicados.
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        data-dismiss="modal"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- end modal detalle CxP -->
+            </div>
+          </div>
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

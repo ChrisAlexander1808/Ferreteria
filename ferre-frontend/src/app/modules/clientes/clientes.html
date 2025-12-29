@@ -1,0 +1,412 @@
+<div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-row flex-column-fluid page">
+        <app-sidebar></app-sidebar>
+        <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+            <app-top></app-top>
+            <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+                <!--begin::Subheader-->
+                <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+                    <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                        <!--begin::Info-->
+                        <div class="d-flex align-items-center flex-wrap mr-2">
+                            <!--begin::Page Title-->
+                            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">ERP Ferronix</h5>
+                            <!--end::Page Title-->
+                            <!--begin::Actions-->
+                            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+                            <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+                            <a [routerLink]="['/dashboard']" class="btn btn-light-warning font-weight-bolder btn-sm">Refrescar</a>
+                            <!--end::Actions-->
+                        </div>
+                        <!--end::Info-->
+                        
+                    </div>
+                </div>
+                <!--end::Subheader-->
+                <!--begin::Entry-->
+                <div class="d-flex flex-column-fluid">
+                    <!--begin::Container-->
+                    <div class="container">
+                        <div class="card card-custom mb-7">
+                            <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                                <div class="card-title">
+                                    <h3 class="card-label">Clientes
+                                    <span class="text-muted pt-2 font-size-sm d-block">Listado de clientes de la empresa</span></h3>
+                                </div>
+                                <div class="card-toolbar">                                    
+            
+                                    <a *ngIf="canCreate" data-toggle="modal" data-target="#exampleModalCenter" class="btn btn-light-success btn-sm font-weight-bold font-size-sm" (click)="openCreateModal()">
+                                        <i class="flaticon-add-circular-button"></i>
+                                        Nuevo Cliente
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!--begin: Search Form-->
+                                <!--begin::Search Form-->
+                                <div class="mb-11">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-9 col-xl-10">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-4 my-2 my-md-0">
+                                                    <div class="input-icon">
+                                                        <input type="text" class="form-control" placeholder="Nombre del cliente o NIT" name="filtro_cliente" [(ngModel)]="filtro_cliente" (keyup)="filtrar()">
+                                                        <span>
+                                                            <i class="flaticon2-search-1 text-muted"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+            
+                                <div class="table-responsive">
+                                    <table class="table table-head-custom table-vertical-center" id="kt_advance_table_widget_4">
+                                        <thead>
+                                            <tr class="text-left">
+                                                <th style="min-width: 50px">ID</th>
+                                                <th class="pl-0" style="min-width: 150px">Nombre</th>
+                                                <th style="min-width: 150px">Dirección</th>
+                                                <th style="min-width: 100px">NIT</th>   
+                                                <th style="min-width: 100px">Correo</th>  
+                                                <th style="min-width: 100px">Teléfono</th> 
+                                                <th style="min-width: 100px">Tipo de Cliente</th>    
+                                                <th style="min-width: 100px">Días de Crédito</th>                         
+                                                <th *ngIf="canUpdate || canDelete" class="pr-0 text-center" style="min-width: 10px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <ng-container *ngIf="load_data">
+                                                <tr>
+                                                    <td colspan="11" class="text-center">
+                                                        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                                                            <span class="sr-only">Cargando...</span>
+                                                          </div>
+                                                    </td>
+                                                </tr>
+                                        </ng-container>
+                                        <ng-container *ngIf="!load_data">
+                                            <tbody>
+                                                <tr *ngFor="let item of clientes | paginate: { itemsPerPage: pageSize, currentPage: page }">
+                                                
+                                                    <td>                                                   
+                                                        <span class="text-muted font-weight-bold d-block">{{item.id}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.nombre}}</span>                                            
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.direccion}}</span>                                              
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.nit}}</span>                                              
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.correo}}</span>                                              
+                                                    </td>
+                                                    <td style="text-align: center;">
+                                                        <span class="text-dark-75 font-size-lg">{{item.telefono}}</span>                                              
+                                                    </td>
+                                                    <td style="text-align: center;">
+                                                        <span class="text-dark-75 font-size-lg">{{item.tipo_cliente}}</span>                                              
+                                                    </td>
+                                                    <td style="text-align: center;">
+                                                        <span *ngIf="item.limite_credito === 0 " class="text-dark-75 font-size-lg">N/A</span>   
+                                                        <span *ngIf="item.limite_credito > 0 " class="text-dark-75 font-size-lg">{{item.limite_credito}} días</span>                                            
+                                                    </td>
+                                                    <td *ngIf="canUpdate || canDelete" class="pr-0 text-center">
+                                                        <a *ngIf="canUpdate" style="cursor: pointer; margin-right: 10px;" (click)="openEditModal(item.id)">
+                                                            <i class="icon-1x text-dark-50 fas fa-edit"></i>
+                                                        </a>
+                                                        <a *ngIf="canDelete" style="cursor: pointer;" data-toggle="modal" [attr.data-target]="'#delete-'+item.id">
+                                                            <i class="icon-1x text-dark-50 fas fa-trash-alt"></i>
+                                                        </a> 
+                                                        <div class="modal fade" id="delete-{{item.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">Eliminación de Clientes</h5>
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p>¿Desea eliminar el cliente?</p>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-warning font-weight-bold" data-dismiss="modal">Cerrar</button>
+                                                                        <button *ngIf="load_delete" type="button" class="btn btn-danger font-weight-bold" (click)="eliminar_cliente(item.id)">Eliminar</button>
+                                                        
+                                                                        <button *ngIf="!load_delete" class="btn btn-danger" type="button" disabled>
+                                                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                                            Enviando...
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                               
+                                            </tbody>
+                                        </ng-container>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <pagination-controls 
+                                        (pageChange)="page = $event" 
+                                        previousLabel="«" 
+                                        nextLabel="»" 
+                                        [directionLinks]="true" 
+                                        [autoHide]="false">
+                                </pagination-controls>
+                              </div>
+                        </div>                      
+                       <!-- MODAL: NUEVO CLIENTE -->
+                        <div class="modal fade" id="modalCreateCliente" tabindex="-1" aria-labelledby="modalCreateClienteLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalCreateClienteLabel">Nuevo Cliente</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                        
+                                    <div class="modal-body">
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                                            Ingrese los siguientes datos:
+                                        </h3>
+                        
+                                        <div class="">
+                                            <!-- Nombre -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Nombre <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre del cliente" name="nombre"
+                                                        [(ngModel)]="createCliente.nombre" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- NIT -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    NIT <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="NIT del cliente (CF si no tiene)"
+                                                        name="nit" [(ngModel)]="createCliente.nit" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Dirección -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Dirección <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección del cliente" name="direccion"
+                                                        [(ngModel)]="createCliente.direccion" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Teléfono -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Teléfono</label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de teléfono" name="telefono"
+                                                        [(ngModel)]="createCliente.telefono" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Correo -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Correo</label>
+                                                <div class="col-lg-9">
+                                                    <input type="email" class="form-control" placeholder="Correo electrónico" name="correo"
+                                                        [(ngModel)]="createCliente.correo" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Tipo de cliente -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Tipo Cliente <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <select class="form-control" name="tipo_cliente" [(ngModel)]="createCliente.tipo_cliente">
+                                                        <option value="" disabled selected>Seleccione tipo</option>
+                                                        <option value="Normal">Consumidor Final</option>
+                                                        <option value="Individual">Individual</option>
+                                                        <option value="Corporativo">Corporativo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Límite de crédito -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Días de Crédito
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="number" min="0" class="form-control" placeholder="Ingrese números enteros Ej. 30 - 45 - 60" name="limite_credito"
+                                                        [(ngModel)]="createCliente.limite_credito" />
+                                                    <span class="form-text text-muted">
+                                                        Si es contado, puede dejarlo en 0
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">
+                                            Cerrar
+                                        </button>
+                        
+                                        <!-- Botón guardar -->
+                                        <button *ngIf="load_cliente" type="button" (click)="save_create_cliente()"
+                                            class="btn btn-primary font-weight-bold">
+                                            Ingresar
+                                        </button>
+                        
+                                        <!-- Loader mientras guarda -->
+                                        <button *ngIf="!load_cliente" class="btn btn-primary font-weight-bold" type="button" disabled>
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Ingresando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="modalUpdateCliente" tabindex="-1" aria-labelledby="modalUpdateClienteLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalUpdateClienteLabel">Actualización del Cliente</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                        
+                                    <div class="modal-body">
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                                            Ingrese los siguientes datos:
+                                        </h3>
+                        
+                                        <div class="">
+                                            <!-- Nombre -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Nombre <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre del cliente" name="nombre"
+                                                        [(ngModel)]="updateCliente.nombre" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- NIT -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    NIT <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="NIT del cliente (CF si no tiene)"
+                                                        name="nit" [(ngModel)]="updateCliente.nit" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Dirección -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Dirección <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección del cliente" name="direccion"
+                                                        [(ngModel)]="updateCliente.direccion" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Teléfono -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Teléfono</label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de teléfono" name="telefono"
+                                                        [(ngModel)]="updateCliente.telefono" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Correo -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Correo</label>
+                                                <div class="col-lg-9">
+                                                    <input type="email" class="form-control" placeholder="Correo electrónico" name="correo"
+                                                        [(ngModel)]="updateCliente.correo" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Tipo de cliente -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Tipo Cliente <span style="color: red;">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <select class="form-control" name="tipo_cliente" [(ngModel)]="updateCliente.tipo_cliente">
+                                                        <option value="" disabled selected>Seleccione tipo</option>
+                                                        <option value="Normal">Consumidor Final</option>
+                                                        <option value="Individual">Individual</option>
+                                                        <option value="Corporativo">Corporativo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Límite de crédito -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Días de Crédito
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="number" min="0" class="form-control" placeholder="Ingrese número enteros Ej. 30 - 45 - 60" name="limite_credito"
+                                                        [(ngModel)]="updateCliente.limite_credito" />
+                                                    <span class="form-text text-muted">
+                                                        Si es contado, puede dejarlo en 0
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">
+                                            Cerrar
+                                        </button>
+                        
+                                        <!-- Botón guardar -->
+                                        <button *ngIf="load_update" type="button" (click)="actualizar()"
+                                            class="btn btn-primary font-weight-bold">
+                                            Actualizar
+                                        </button>
+
+                                        <button *ngIf="!load_update" class="btn btn-primary font-weight-bold" type="button" disabled>
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Actualizando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Container-->
+                </div>
+                <!--end::Entry-->
+            </div>
+        </div>
+    </div>
+</div>

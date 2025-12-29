@@ -1,0 +1,38 @@
+/* Si no lo tienes importado aquí, puedes usar esta forma:
+@import "~@ng-select/ng-select/themes/default.theme.css";
+*/
+
+/* Clase que usamos en el HTML: ng-select-bootstrap */
+.ng-select.ng-select-bootstrap .ng-select-container {
+  min-height: 38px;             /* altura tipo form-control */
+  border-radius: 0.42rem;       /* mismo radio que Metronic */
+  border: 1px solid #E4E6EF;    /* mismo color de borde */
+  box-shadow: none;
+}
+
+/* Alinear el contenido al centro verticalmente */
+.ng-select.ng-select-bootstrap .ng-select-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Texto interno */
+.ng-select.ng-select-bootstrap .ng-value-container {
+  padding: 0 8px;
+}
+
+/* Input de búsqueda dentro del select */
+.ng-select.ng-select-bootstrap .ng-select-container .ng-input > input {
+  height: 100%;
+}
+
+/* Dropdown por encima de la tabla/form */
+.ng-select.ng-select-bootstrap .ng-dropdown-panel {
+  z-index: 1050;  /* por encima de la card/metronic */
+}
+
+.is-invalid {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+}
+

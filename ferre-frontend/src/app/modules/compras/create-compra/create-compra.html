@@ -1,0 +1,458 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">
+                Nueva Compra
+              </span>
+            </div>
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Nueva Compra
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Registro de compra con detalle de productos y gastos
+                      asociados
+                    </span>
+                  </h3>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Loader inicial -->
+                <div *ngIf="loadingData" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <div *ngIf="!loadingData">
+                  <!-- CABECERA -->
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Proveedor <span style="color: red">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <ng-select
+                        [items]="proveedores"
+                        bindLabel="nombre"
+                        bindValue="id"
+                        placeholder="Seleccionar proveedor"
+                        [(ngModel)]="selectedProveedorId"
+                        [searchable]="true"
+                        [clearable]="true"
+                        [searchFn]="proveedorSearchFn"
+                        [appendTo]="'body'"
+                        name="proveedor_id"
+                        class="w-100"
+                      >
+                        <ng-template ng-option-tmp let-item="item">
+                          {{ item.nombre }}
+                          <span *ngIf="item.nit"> - NIT: {{ item.nit }}</span>
+                        </ng-template>
+                      </ng-select>
+                    </div>
+
+                    <label class="col-lg-2 col-form-label text-left">
+                      Fecha <span style="color: red">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                      <input
+                        type="date"
+                        class="form-control"
+                        name="fecha"
+                        [(ngModel)]="fecha"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Tipo de compra <span style="color: red">*</span>
+                    </label>
+
+                    <div class="col-lg-4">
+                      <div class="btn-group">
+                        <button
+                          type="button"
+                          class="btn btn-sm"
+                          [ngClass]="{
+                            'btn-primary': tipo_compra === 'CONTADO',
+                            'btn-outline-primary': tipo_compra !== 'CONTADO'
+                          }"
+                          (click)="setTipoCompra('CONTADO')"
+                        >
+                          Contado
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn btn-sm ml-2"
+                          [ngClass]="{
+                            'btn-info': tipo_compra === 'CREDITO',
+                            'btn-outline-info': tipo_compra !== 'CREDITO'
+                          }"
+                          (click)="setTipoCompra('CREDITO')"
+                        >
+                          Crédito
+                        </button>
+                      </div>
+                    </div>
+
+                    <label class="col-lg-2 col-form-label text-left">
+                      No. Factura
+                    </label>
+                    <div class="col-lg-4">
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="numero_factura"
+                        [(ngModel)]="numero_factura"
+                        placeholder="Número de factura (opcional)"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group row" *ngIf="tipo_compra === 'CREDITO'">
+                    <label class="col-lg-2 col-form-label text-left">
+                        Fecha vencimiento <span style="color: red">*</span>
+                    </label>
+                    <div class="col-lg-4">
+                        <input
+                        type="date"
+                        class="form-control"
+                        name="fecha_vencimiento"
+                        [(ngModel)]="fecha_vencimiento"
+                        />
+                    </div>
+                    </div>
+
+
+                  <div class="form-group row">
+                    <label class="col-lg-2 col-form-label text-left">
+                      Observación
+                    </label>
+                    <div class="col-lg-10">
+                      <textarea
+                        class="form-control"
+                        rows="2"
+                        name="observacion"
+                        [(ngModel)]="observacion"
+                        placeholder="Comentarios adicionales de la compra"
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <hr />
+
+                  <!-- DETALLE PRODUCTOS -->
+                  <h4 class="mb-4">Detalle de productos</h4>
+
+                  <div class="table-responsive">
+                    <table class="table table-head-custom table-vertical-center">
+                      <thead>
+                        <tr class="text-left">
+                          <th style="min-width: 60px">#</th>
+                          <th style="min-width: 220px">Producto</th>
+                          <th style="min-width: 100px">Cantidad</th>
+                          <th style="min-width: 120px">Precio</th>
+                          <th style="min-width: 120px">Subtotal</th>
+                          <th style="min-width: 60px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let d of detalles; let i = index">
+                          <td>{{ i + 1 }}</td>
+
+                          <!-- Producto -->
+                          <td>
+                            <ng-select
+                              [items]="productos"
+                              bindLabel="nombre"
+                              bindValue="id"
+                              placeholder="Seleccione producto"
+                              [(ngModel)]="d.producto_id"
+                              (change)="onProductoChange(d)"
+                              [searchable]="true"
+                              [clearable]="true"
+                              [searchFn]="productoSearchFn"
+                              [appendTo]="'body'"
+                              name="producto_id_{{ i }}"
+                              class="w-100"
+                            >
+                              <!-- etiqueta seleccionada -->
+                              <ng-template ng-label-tmp let-item="item">
+                                {{ item.nombre }}
+                                <span *ngIf="item.codigo">
+                                  ({{ item.codigo }})
+                                </span>
+                              </ng-template>
+
+                              <!-- opciones -->
+                              <ng-template ng-option-tmp let-item="item">
+                                <div class="d-flex flex-column">
+                                  <span class="font-weight-bold">
+                                    {{ item.nombre }}
+                                    <span *ngIf="item.codigo">
+                                      ({{ item.codigo }})
+                                    </span>
+                                  </span>
+                                </div>
+                              </ng-template>
+                            </ng-select>
+                          </td>
+
+                          <!-- Cantidad -->
+                          <td>
+                            <input
+                              type="number"
+                              min="1"
+                              class="form-control"
+                              name="cantidad_{{ i }}"
+                              [(ngModel)]="d.cantidad"
+                              (change)="onCantidadOrPrecioChange(d)"
+                            />
+                          </td>
+
+                          <!-- Precio -->
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              class="form-control"
+                              name="precio_{{ i }}"
+                              [(ngModel)]="d.precio_unitario"
+                              (change)="onCantidadOrPrecioChange(d)"
+                            />
+                          </td>
+
+                          <!-- Subtotal -->
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ d.subtotal | currency: 'Q' }}
+                            </span>
+                          </td>
+
+                          <!-- Quitar línea -->
+                          <td class="text-center">
+                            <a
+                              style="cursor: pointer"
+                              (click)="removeLineaDetalle(i)"
+                              *ngIf="detalles.length > 1"
+                            >
+                              <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                          </td>
+                        </tr>
+
+                        <tr
+                          *ngFor="let d of detalles; let i = index"
+                          [ngClass]="{ 'd-none': !d.error }"
+                        >
+                          <td colspan="6">
+                            <div
+                              *ngIf="d.error"
+                              class="text-danger font-size-sm pl-5"
+                            >
+                              {{ d.error }}
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="mt-3">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary btn-sm font-weight-bold"
+                      (click)="addLineaDetalle()"
+                    >
+                      <i class="flaticon-add-circular-button"></i>
+                      Agregar producto
+                    </button>
+                  </div>
+
+                  <hr />
+
+                  <!-- GASTOS ADICIONALES -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4 class="mb-0">Gastos asociados</h4>
+                    <button
+                      type="button"
+                      class="btn btn-light-primary btn-sm font-weight-bold"
+                      (click)="addGasto()"
+                    >
+                      <i class="flaticon-add-circular-button"></i>
+                      Agregar gasto
+                    </button>
+                  </div>
+
+                  <div class="table-responsive" *ngIf="gastos && gastos.length">
+                    <table class="table table-head-custom table-vertical-center">
+                      <thead>
+                        <tr class="text-left">
+                          <th style="min-width: 60px">#</th>
+                          <th style="min-width: 220px">Descripción</th>
+                          <th style="min-width: 120px">Monto</th>
+                          <th style="min-width: 60px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let g of gastos; let i = index">
+                          <td>{{ i + 1 }}</td>
+                          <td>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="gasto_desc_{{ i }}"
+                              [(ngModel)]="g.descripcion"
+                              placeholder="Descripción del gasto (ej. transporte, gasolina, etc.)"
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              class="form-control"
+                              name="gasto_monto_{{ i }}"
+                              [(ngModel)]="g.monto"
+                              (change)="onGastoChange(g)"
+                            />
+                          </td>
+                          <td class="text-center">
+                            <a
+                              style="cursor: pointer"
+                              (click)="removeGasto(i)"
+                            >
+                              <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                          </td>
+                        </tr>
+
+                        <tr *ngFor="let g of gastos; let i = index">
+                          <td colspan="4">
+                            <div
+                              *ngIf="g.error"
+                              class="text-danger font-size-sm pl-5"
+                            >
+                              {{ g.error }}
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div
+                    *ngIf="!gastos || gastos.length === 0"
+                    class="text-muted font-size-sm mb-3"
+                  >
+                    No hay gastos adicionales registrados.
+                  </div>
+
+                  <hr />
+
+                  <!-- TOTALES -->
+                  <div class="row">
+                    <div class="col-lg-8">
+                      <div class="mb-2">
+                        <span class="font-weight-bold">
+                          Total productos:
+                          <strong>{{
+                            totalProductos | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                      <div class="mb-2">
+                        <span class="font-weight-bold">
+                          Total gastos:
+                          <strong>{{
+                            totalGastos | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 text-right">
+                      <h4>
+                        Total compra:
+                        <strong>{{ totalCompra | currency: 'Q' }}</strong>
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="text-right">
+                  <button
+                    type="button"
+                    class="btn btn-secondary font-weight-bold mr-2"
+                    (click)="cancelar()"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    *ngIf="!saving"
+                    type="button"
+                    class="btn btn-primary font-weight-bold"
+                    (click)="guardarCompra()"
+                  >
+                    Guardar Compra
+                  </button>
+
+                  <button
+                    *ngIf="saving"
+                    class="btn btn-primary font-weight-bold"
+                    type="button"
+                    disabled
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Guardando...
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

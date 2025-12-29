@@ -1,0 +1,535 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <!--begin::Info-->
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <!--begin::Page Title-->
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <!--end::Page Title-->
+              <!--begin::Actions-->
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+              <a
+                [routerLink]="['/dashboard']"
+                class="btn btn-light-warning font-weight-bolder btn-sm"
+                >Refrescar</a
+              >
+              <!--end::Actions-->
+            </div>
+            <!--end::Info-->
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <!--begin::Container-->
+          <div class="container">
+            <div class="card card-custom mb-7">
+              <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Ventas
+                    <span
+                      class="text-muted pt-2 font-size-sm d-block"
+                      >Listado de ventas registradas</span
+                    >
+                  </h3>
+                </div>
+                <div class="card-toolbar">
+                  <a
+                    *ngIf="canCreate"
+                    class="btn btn-light-success btn-sm font-weight-bold font-size-sm"
+                    style="cursor: pointer"
+                    (click)="ir_crear_venta()"
+                  >
+                    <i class="flaticon-add-circular-button"></i>
+                    Nueva Venta
+                  </a>
+                </div>
+              </div>
+
+              <div class="card-body">
+                
+                <!-- Buscador -->
+                <!-- FILTROS -->
+                <div class="mb-6">
+                  <div class="form-row">
+                    <div class="form-group col-lg-4">
+                      <label>Buscar cliente / # venta</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Escriba cliente o # venta"
+                        [(ngModel)]="filtro_venta"
+                        name="filtro_venta"
+                        (keyup)="filtrar()"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                      <label>Desde</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_desde"
+                        name="fecha_desde"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                      <label>Hasta</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_hasta"
+                        name="fecha_hasta"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-2 d-flex align-items-end">
+                      <button
+                        type="button"
+                        class="btn btn-light-primary btn-sm mr-2"
+                        (click)="init_ventas()"
+                      >
+                        <i class="flaticon2-search-1"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-light-danger btn-sm"
+                        (click)="limpiarFiltros()"
+                      >
+                        <i class="flaticon2-refresh"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- RESUMEN -->
+                <div class="row mb-5">
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-primary">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Total registros:
+                          <strong>{{ resumen.totalRegistros }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-success">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Total ventas:
+                          <strong>{{
+                            resumen.totalVentas | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-info">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Compras contado:
+                          <strong>{{
+                            resumen.totalContado | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-warning">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Compras crédito:
+                          <strong>{{
+                            resumen.totalCredito | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-responsive">
+                  <table
+                    class="table table-head-custom table-vertical-center"
+                    id="kt_advance_table_widget_4"
+                  >
+                    <thead>
+                      <tr class="text-left">
+                        <th style="min-width: 60px"># Venta</th>
+                        <th style="min-width: 150px">Fecha</th>
+                        <th style="min-width: 200px">Cliente</th>
+                        <th style="min-width: 200px">Factura</th>
+                        <th style="min-width: 120px">Total</th>
+                        <th style="min-width: 100px">Tipo</th>
+                        <th style="min-width: 100px">Estado</th>
+                        <th
+                          *ngIf="canView || canCancel"
+                          class="pr-0 text-center"
+                          style="min-width: 80px"
+                        >
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <!-- Loading -->
+                    <ng-container *ngIf="load_data">
+                      <tr>
+                        <td colspan="6" class="text-center">
+                          <div
+                            class="spinner-border"
+                            style="width: 3rem; height: 3rem"
+                            role="status"
+                          >
+                            <span class="sr-only">Cargando...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </ng-container>
+
+                    <!-- Data -->
+                    <ng-container *ngIf="!load_data">
+                      <tbody>
+                        <tr
+                          *ngFor="
+                            let item of ventas
+                              | paginate
+                                : { itemsPerPage: pageSize, currentPage: page }
+                          "
+                        >
+                          <td>
+                            <span class="text-muted font-weight-bold d-block"
+                              >{{ item.id }}</span
+                            >
+                          </td>
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.fecha | date: 'dd/MM/yyyy':'UTC' }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.cliente?.nombre || 'Consumidor Final' }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.numero_factura || '-' }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-dark-75 font-size-lg">
+                              {{ item.total | currency: 'Q' }}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              class="label label-inline"
+                              [ngClass]="{
+                                'label-primary': item.tipo_venta === 'CONTADO',
+                                'label-warning': item.tipo_venta === 'CREDITO'
+                              }"
+                            >
+                              {{ item.tipo_venta }}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              class="label label-inline"
+                              [ngClass]="{
+                                'label-success': item.estado,
+                                'label-danger': !item.estado
+                              }"
+                            >
+                              {{ item.estado ? '✔ ACTIVA' : '✘ ANULADA' }}
+                            </span>
+                          </td>
+
+                          <td
+                            *ngIf="canView || canCancel"
+                            class="pr-0 text-center"
+                          >
+                            <!-- Ver detalle -->
+                            <a
+                              *ngIf="canView"
+                              style="cursor: pointer; margin-right: 10px"
+                              (click)="openDetalleModal(item)"
+                            >
+                              <i
+                                class="icon-1x text-dark-50 fas fa-eye"
+                              ></i>
+                            </a>
+
+                            <!-- Anular -->
+                            <a
+                              *ngIf="canCancel && item.estado"
+                              style="cursor: pointer"
+                              (click)="openAnularModal(item.id)"
+                            >
+                              <i
+                                class="icon-1x text-dark-50 fas fa-ban"
+                              ></i>
+                            </a>
+
+                            <!-- Modal anular venta -->
+                            <div
+                              class="modal fade"
+                              id="anular-{{ item.id }}"
+                              tabindex="-1"
+                              role="dialog"
+                              aria-labelledby="anularVentaLabel"
+                              aria-hidden="true"
+                            >
+                              <div
+                                class="modal-dialog"
+                                role="document"
+                              >
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5
+                                      class="modal-title"
+                                      id="anularVentaLabel"
+                                    >
+                                      Anulación de Venta
+                                    </h5>
+                                    <button
+                                      type="button"
+                                      class="close"
+                                      data-dismiss="modal"
+                                      aria-label="Close"
+                                    >
+                                      <i
+                                        aria-hidden="true"
+                                        class="ki ki-close"
+                                      ></i>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <p>
+                                      ¿Está seguro que desea anular la venta
+                                      #{{ item.id }}?
+                                    </p>
+                                    <p class="mb-0">
+                                      <strong>Cliente:</strong>
+                                      {{ item.cliente?.nombre ||
+                                      'Consumidor Final' }}<br />
+                                      <strong>Total:</strong>
+                                      {{ item.total | currency: 'Q' }}
+                                    </p>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      type="button"
+                                      class="btn btn-warning font-weight-bold"
+                                      data-dismiss="modal"
+                                    >
+                                      Cerrar
+                                    </button>
+
+                                    <button
+                                      *ngIf="load_cancel"
+                                      type="button"
+                                      class="btn btn-danger font-weight-bold"
+                                      (click)="anular_venta(item.id)"
+                                    >
+                                      Anular
+                                    </button>
+
+                                    <button
+                                      *ngIf="!load_cancel"
+                                      class="btn btn-danger"
+                                      type="button"
+                                      disabled
+                                    >
+                                      <span
+                                        class="spinner-border spinner-border-sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                      ></span>
+                                      Anulando...
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ng-container>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Paginación -->
+              <div class="card-footer text-center">
+                <pagination-controls
+                  (pageChange)="page = $event"
+                  previousLabel="«"
+                  nextLabel="»"
+                  [directionLinks]="true"
+                  [autoHide]="false"
+                >
+                </pagination-controls>
+              </div>
+            </div>
+
+            <!-- MODAL DETALLE VENTA -->
+            <div
+              class="modal fade"
+              id="modalDetalleVenta"
+              tabindex="-1"
+              aria-labelledby="modalDetalleVentaLabel"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-lg modal-dialog-centered"
+                role="document"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="modalDetalleVentaLabel"
+                    >
+                      Detalle de Venta
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                  </div>
+                  <div class="modal-body" *ngIf="selectedVenta">
+                    <div class="mb-4">
+                      <p class="mb-1">
+                        <strong># Venta:</strong> {{ selectedVenta.id }}
+                      </p>
+                      <p class="mb-1">
+                        <strong>Fecha:</strong>
+                        {{ selectedVenta.fecha | date: 'short' }}
+                      </p>
+                      <p class="mb-1">
+                        <strong>Cliente:</strong>
+                        {{ selectedVenta.cliente?.nombre || 'Consumidor Final' }}
+                      </p>
+                      <p class="mb-1" *ngIf="selectedVenta.observacion">
+                        <strong>Observación:</strong>
+                        {{ selectedVenta.observacion }}
+                      </p>
+                      <p class="mb-1">
+                        <strong>Tipo de Venta:</strong>
+                        {{ selectedVenta.tipo_venta }}
+                      </p>
+                      <p class="mb-1">
+                        <strong>Estado:</strong>
+                        {{ selectedVenta.estado ? '✔ ACTIVA' : '✘ ANULADA' }}
+                      </p>
+                    </div>
+
+                    <div class="table-responsive">
+                      <table
+                        class="table table-head-custom table-vertical-center"
+                      >
+                        <thead>
+                          <tr class="text-left">
+                            <th style="min-width: 50px">#</th>
+                            <th style="min-width: 200px">Descripción</th>
+                            <th style="min-width: 80px">Tipo</th>
+                            <th style="min-width: 80px">Cant.</th>
+                            <th style="min-width: 100px">Precio</th>
+                            <th style="min-width: 100px">Subtotal</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            *ngFor="
+                              let d of selectedVenta.detalles;
+                              let i = index
+                            "
+                          >
+                            <td>{{ i + 1 }}</td>
+                            <td>
+                              <span class="text-dark-75 font-size-lg">
+                                <ng-container
+                                  *ngIf="d.tipo_item === 'BIEN'; else esServicio"
+                                >
+                                  {{ d.producto?.nombre || 'Producto' }}
+                                </ng-container>
+                                <ng-template #esServicio>
+                                  {{ d.descripcion }}
+                                </ng-template>
+                              </span>
+                            </td>
+                            <td>{{ d.tipo_item }}</td>
+                            <td>{{ d.cantidad }}</td>
+                            <td>
+                              {{ d.precio_unitario | currency: 'Q' }}
+                            </td>
+                            <td>
+                              {{ d.subtotal | currency: 'Q' }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="text-right mt-4">
+                      <h4>
+                        Total:
+                        <strong>{{
+                          selectedVenta.total | currency: 'Q'
+                        }}</strong>
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-light-primary font-weight-bold"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /MODAL DETALLE VENTA -->
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

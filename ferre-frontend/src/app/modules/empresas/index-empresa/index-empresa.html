@@ -1,0 +1,277 @@
+<div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-row flex-column-fluid page">
+        <app-sidebar></app-sidebar>
+        <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+            <app-top></app-top>
+            <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+                <!--begin::Subheader-->
+                <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+                    <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                        <!--begin::Info-->
+                        <div class="d-flex align-items-center flex-wrap mr-2">
+                            <!--begin::Page Title-->
+                            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">ERP Ferronix</h5>
+                            <!--end::Page Title-->
+                            <!--begin::Actions-->
+                            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+                            <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+                            <a [routerLink]="['/dashboard']" class="btn btn-light-warning font-weight-bolder btn-sm">Refrescar</a>
+                            <!--end::Actions-->
+                        </div>
+                        <!--end::Info-->
+                        
+                    </div>
+                </div>
+                <!--end::Subheader-->
+                <!--begin::Entry-->
+                <div class="d-flex flex-column-fluid">
+                    <!--begin::Container-->
+                    <div class="container">
+                        <div class="card card-custom mb-7">
+                            <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                                <div class="card-title">
+                                    <h3 class="card-label">Empresas
+                                    <span class="text-muted pt-2 font-size-sm d-block">Listado de empresas del sistema</span></h3>
+                                </div>
+                                <div class="card-toolbar">                                    
+            
+                                    <a data-toggle="modal" data-target="#exampleModalCenter" class="btn btn-light-success btn-sm font-weight-bold font-size-sm" (click)="openCreateModal()">
+                                        <i class="flaticon-add-circular-button"></i>
+                                        Nuevo Empresa
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!--begin: Search Form-->
+                                <!--begin::Search Form-->
+                                <div class="mb-11">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-9 col-xl-10">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-4 my-2 my-md-0">
+                                                    <div class="input-icon">
+                                                        <input type="text" class="form-control" placeholder="Nombre de la Empresa" name="filtro_empresa" [(ngModel)]="filtro_empresa" (keyup)="filtrar()">
+                                                        <span>
+                                                            <i class="flaticon2-search-1 text-muted"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>  
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+            
+                                <div class="table-responsive">
+                                    <table class="table table-head-custom table-vertical-center" id="kt_advance_table_widget_4">
+                                        <thead>
+                                            <tr class="text-left">
+                                                <th style="min-width: 50px">ID</th>
+                                                <th class="pl-0" style="min-width: 200px">Empresa</th>
+                                                <th style="min-width: 200px">Dirección</th>
+                                                <th style="min-width: 200px">Correo</th>
+                                                <th style="min-width: 100px">NIT</th>      
+                                                <th style="min-width: 100px">Teléfono</th>        
+                                                <th style="min-width: 100px">Estado</th>                                  
+                                                <th class="pr-0 text-center" style="min-width: 10px">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <ng-container *ngIf="load_data">
+                                                <tr>
+                                                    <td colspan="11" class="text-center">
+                                                        <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                                                            <span class="sr-only">Cargando...</span>
+                                                          </div>
+                                                    </td>
+                                                </tr>
+                                        </ng-container>
+                                        <ng-container *ngIf="!load_data">
+                                            <tbody>
+                                                <tr *ngFor="let item of empresas | paginate: { itemsPerPage: pageSize, currentPage: page }">
+                                                
+                                                    <td>                                                   
+                                                        <span class="text-muted font-weight-bold d-block">{{item.id}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.nombre}}</span>                                            
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.direccion}}</span>                                              
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">{{item.correo}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg text-success">{{item.nit}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg text-success">{{item.telefono}}</span>
+                                                    </td>
+                                                     <td>
+                                                        <span *ngIf="item.estado" class="text-success font-weight-bold"><span class="label label-success label-dot mr-2"></span>Activa</span>    
+                                                        <span *ngIf="!item.estado" class="text-danger font-weight-bold"><span class="label label-danger label-dot mr-2"></span>Inactiva</span> 
+                                                    </td>
+                                                    <td class="pr-0 text-center">
+                                                        <a style="cursor: pointer; margin-right: 10px;" (click)="openEditModal(item.id)">
+                                                            <i class="icon-1x text-dark-50 fas fa-edit"></i>
+                                                        </a>
+                                                        <a style="cursor: pointer;" data-toggle="modal" [attr.data-target]="'#delete-'+item.id">
+                                                            <i class="icon-1x text-dark-50 fas fa-trash-alt"></i>
+                                                        </a> 
+                                                        <div class="modal fade" id="delete-{{item.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">Eliminación empresa</h5>
+                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p>¿Desea desactivar la empresa?</p>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-warning font-weight-bold" data-dismiss="modal">Cerrar</button>
+                                                                        <button *ngIf="load_delete" type="button" class="btn btn-danger font-weight-bold" (click)="eliminar_empresa(item.id)">Desactivar</button>
+                                                        
+                                                                        <button *ngIf="!load_delete" class="btn btn-danger" type="button" disabled>
+                                                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                                            Enviando...
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                               
+                                            </tbody>
+                                        </ng-container>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer text-center">
+                                <pagination-controls 
+                                        (pageChange)="page = $event" 
+                                        previousLabel="«" 
+                                        nextLabel="»" 
+                                        [directionLinks]="true" 
+                                        [autoHide]="false">
+                                </pagination-controls>
+                              </div>
+                        </div>                      
+                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Nueva Empresa</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">                                        
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">Ingrese los siguientes datos:</h3>
+                                        <div class="">
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Nombre<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre de la Empresa" name="nombre" [(ngModel)]="createEmpresa.nombre">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Dirección<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección de la Empresa" name="direccion" [(ngModel)]="createEmpresa.direccion">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Teléfono<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de Teléfono" name="telefono" [(ngModel)]="createEmpresa.telefono">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Email<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="gerencia@miempresa.com" name="correo" [(ngModel)]="createEmpresa.correo">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">NIT<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de Identificación Tributaria" name="nit" [(ngModel)]="createEmpresa.nit">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Cerrar</button>
+                                        <button *ngIf="load_empresa" type="button" (click)="save()" class="btn btn-primary font-weight-bold">Ingresar</button>
+                                        <button *ngIf="!load_empresa" class="btn btn-primary font-weight-bold" type="button" disabled>
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Ingresando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>               
+                        <div class="modal fade" id="exampleModalCenterUpdate" tabindex="-1" aria-labelledby="exampleModalCenterUpdate" style="display: none;" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Actualizar Empresa</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">                                        
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">Actualice los datos:</h3>
+                                        <div class="">
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Nombre<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre de la Empresa" name="nombre" [(ngModel)]="updateEmpresa.nombre">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Dirección<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección de la Empresa" name="direccion" [(ngModel)]="updateEmpresa.direccion">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Teléfono<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de Teléfono" name="telefono" [(ngModel)]="updateEmpresa.telefono">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">Email<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="gerencia@miempresa.com" name="correo" [(ngModel)]="updateEmpresa.correo">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">NIT<span style="color: red;">*</span></label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de Identificación Tributaria" name="nit" [(ngModel)]="updateEmpresa.nit">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Cerrar</button>
+                                        <button type="button" (click)="actualizar()" class="btn btn-primary font-weight-bold">Actualizar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        
+
+                    </div>
+                    <!--end::Container-->
+                </div>
+                <!--end::Entry-->
+            </div>
+        </div>
+    </div>
+</div>

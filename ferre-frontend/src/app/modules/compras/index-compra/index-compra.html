@@ -1,0 +1,534 @@
+<div class="d-flex flex-column flex-root">
+  <div class="d-flex flex-row flex-column-fluid page">
+    <app-sidebar></app-sidebar>
+
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+      <app-top></app-top>
+
+      <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+          <div
+            class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap"
+          >
+            <div class="d-flex align-items-center flex-wrap mr-2">
+              <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ERP Ferronix
+              </h5>
+              <div
+                class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"
+              ></div>
+              <span class="text-muted font-weight-bold mr-4">
+                Compras
+              </span>
+            </div>
+
+            
+          </div>
+        </div>
+        <!--end::Subheader-->
+
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+          <div class="container">
+            <div class="card card-custom">
+              <div class="card-header">
+                <div class="card-title">
+                  <h3 class="card-label">
+                    Listado de Compras
+                    <span class="text-muted pt-2 font-size-sm d-block">
+                      Historial de compras a proveedores
+                    </span>
+                  </h3>
+                </div>
+                <div class="d-flex align-items-center">
+                <button
+                    *ngIf="canCreate"
+                    class="btn btn-primary btn-sm"
+                    type="button"
+                    (click)="nueva_compra()"
+                >
+                    <i class="flaticon-add-circular-button"></i>
+                    Nueva Compra
+                </button>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- FILTROS -->
+                <div class="mb-6">
+                  <div class="form-row">
+                    <div class="form-group col-lg-4">
+                      <label>Buscar proveedor / NIT</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Escriba nombre o NIT del proveedor"
+                        [(ngModel)]="searchProveedor"
+                        name="searchProveedor"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                      <label>Desde</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_desde"
+                        name="fecha_desde"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                      <label>Hasta</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        [(ngModel)]="fecha_hasta"
+                        name="fecha_hasta"
+                      />
+                    </div>
+
+                    <div class="form-group col-lg-2 d-flex align-items-end">
+                      <button
+                        type="button"
+                        class="btn btn-light-primary btn-sm mr-2"
+                        (click)="init_compras()"
+                      >
+                        <i class="flaticon2-search-1"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-light-danger btn-sm"
+                        (click)="limpiarFiltros()"
+                      >
+                        <i class="flaticon2-refresh"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- RESUMEN -->
+                <div class="row mb-5">
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-primary">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Total registros:
+                          <strong>{{ resumen.totalRegistros }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-success">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Total compras:
+                          <strong>{{
+                            resumen.totalCompras | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-info">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Compras contado:
+                          <strong>{{
+                            resumen.totalContado | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3">
+                    <div class="card card-custom bg-light-warning">
+                      <div class="card-body py-3">
+                        <span class="font-weight-bold">
+                          Compras crédito:
+                          <strong>{{
+                            resumen.totalCredito | currency: 'Q'
+                          }}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- LOADER -->
+                <div *ngIf="load_data" class="text-center my-10">
+                  <div
+                    class="spinner-border"
+                    style="width: 3rem; height: 3rem"
+                    role="status"
+                  >
+                    <span class="sr-only">Cargando...</span>
+                  </div>
+                </div>
+
+                <!-- TABLA -->
+                <div *ngIf="!load_data" class="table-responsive">
+                  <table class="table table-head-custom table-vertical-center">
+                    <thead>
+                      <tr class="text-left">
+                        <th style="min-width: 50px">#</th>
+                        <th style="min-width: 90px">Fecha</th>
+                        <th style="min-width: 200px">Proveedor</th>
+                        <th style="min-width: 100px">Tipo</th>
+                        <th style="min-width: 140px">Factura</th>
+                        <th style="min-width: 120px">Total</th>
+                        <th style="min-width: 100px">Estado</th>
+                        <th style="min-width: 100px">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let c of comprasFiltradas">
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.fecha | date: 'dd/MM/yyyy':'UTC' }}</td>
+
+                        <td>
+                          <div class="d-flex flex-column">
+                            <span class="font-weight-bold">
+                              {{ c.proveedor?.nombre || 'N/A' }}
+                            </span>                          
+                          </div>
+                        </td>
+
+                        <td>
+                          <span [ngClass]="getTipoBadgeClass(c.tipo_compra)">
+                            {{ c.tipo_compra }}
+                          </span>
+                        </td>
+
+                        <td>
+                          {{ c.numero_factura || 'N/A' }}
+                        </td>
+
+                        <td>
+                          <strong>{{ c.total | currency: 'Q' }}</strong>
+                        </td>
+
+                        <td>
+                          <span
+                            class="badge badge-pill"
+                            [ngClass]="getEstadoBadgeClass(c.estado)"
+                          >
+                            {{ c.estado }}
+                          </span>
+                        </td>
+
+                        <td>
+                          <a
+                            style="cursor: pointer"
+                            class="text-primary mr-3"
+                            (click)="ver_detalle(c)"
+                          >
+                            <i class="flaticon2-search"></i>
+                          </a>
+
+                          <a
+                            *ngIf="canCancel && c.estado === 'ACTIVA'"
+                            style="cursor: pointer"
+                            class="text-danger"
+                            (click)="open_modal_anular(c)"
+                          >
+                            <i class="flaticon2-trash"></i>
+                          </a>
+
+                          <!-- Modal anular -->
+                          <div
+                            class="modal fade"
+                            tabindex="-1"
+                            role="dialog"
+                            id="anularCompra-{{ c.id }}"
+                          >
+                            <div class="modal-dialog modal-sm" role="document">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">
+                                    Anular compra #{{ c.id }}
+                                  </h5>
+                                  <button
+                                    type="button"
+                                    class="close"
+                                    data-dismiss="modal"
+                                    aria-label="Close"
+                                  >
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <p>
+                                    ¿Seguro que deseas anular esta compra por
+                                    <strong>{{
+                                      c.total | currency: 'Q'
+                                    }}</strong
+                                    >?
+                                  </p>
+                                  <p class="text-muted">
+                                    Se revertirá el inventario asociado a esta
+                                    compra.
+                                  </p>
+                                </div>
+                                <div class="modal-footer">
+                                  <button
+                                    type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    data-dismiss="modal"
+                                  >
+                                    Cancelar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    (click)="anular_compra(c)"
+                                    [disabled]="!load_cancel"
+                                  >
+                                    <span *ngIf="load_cancel">Anular</span>
+                                    <span *ngIf="!load_cancel">
+                                      <span
+                                        class="spinner-border spinner-border-sm"
+                                        role="status"
+                                      ></span>
+                                      Procesando...
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- end modal anular -->
+                        </td>
+                      </tr>
+
+                      <tr *ngIf="comprasFiltradas.length === 0">
+                        <td colspan="7" class="text-center text-muted">
+                          No hay compras para los filtros seleccionados.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL DETALLE COMPRA -->
+            <div
+              class="modal fade"
+              id="detalleCompraModal"
+              tabindex="-1"
+              role="dialog"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">
+                      Detalle de compra
+                      <span *ngIf="compraSeleccionada">
+                        #{{ compraSeleccionada.id }}
+                      </span>
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+
+                  <div class="modal-body">
+                    <div *ngIf="loadingDetalle" class="text-center my-5">
+                      <div
+                        class="spinner-border"
+                        style="width: 2.5rem; height: 2.5rem"
+                        role="status"
+                      >
+                        <span class="sr-only">Cargando detalle...</span>
+                      </div>
+                    </div>
+
+                    <div *ngIf="!loadingDetalle && compraSeleccionada">
+                      <!-- Cabecera -->
+                      <div class="row mb-4">
+                        <div class="col-md-6">
+                          <h5>Proveedor</h5>
+                          <p class="mb-1">
+                            <strong>
+                              {{
+                                compraSeleccionada.proveedor?.nombre || 'N/A'
+                              }}
+                            </strong>
+                          </p>
+                          <p
+                            class="mb-1"
+                            *ngIf="compraSeleccionada.proveedor?.nit"
+                          >
+                            NIT:
+                            {{ compraSeleccionada.proveedor?.nit }}
+                          </p>
+                          <p class="mb-1">
+                            Fecha:
+                            {{
+                              compraSeleccionada.fecha
+                                | date: 'dd-MM-yyyy'
+                            }}
+                          </p>
+                          <p class="mb-0">
+                            Tipo:
+                            {{ compraSeleccionada.tipo_compra }}
+                          </p>
+                        </div>
+
+                        <div class="col-md-6 text-right">
+                          <p class="mb-1">
+                            Factura:
+                            {{
+                              compraSeleccionada.numero_factura || 'N/A'
+                            }}
+                          </p>
+                          <p class="mb-1">
+                            Estado:
+                            <span
+                              class="badge badge-pill"
+                              [ngClass]="
+                                getEstadoBadgeClass(compraSeleccionada.estado)
+                              "
+                            >
+                              {{ compraSeleccionada.estado }}
+                            </span>
+                          </p>
+                          <h4 class="mt-2">
+                            Total:
+                            <strong>{{
+                              compraSeleccionada.total | currency: 'Q'
+                            }}</strong>
+                          </h4>
+                        </div>
+                      </div>
+
+                      <!-- Detalle productos -->
+                      <h5>Detalle de productos</h5>
+                      <div class="table-responsive mb-4">
+                        <table
+                          class="table table-sm table-striped table-borderless"
+                        >
+                          <thead class="thead-light">
+                            <tr>
+                              <th>#</th>
+                              <th>Producto</th>
+                              <th>Cantidad</th>
+                              <th>Precio</th>
+                              <th>Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              *ngFor="
+                                let d of compraSeleccionada.detalles;
+                                let i = index
+                              "
+                            >
+                              <td>{{ i + 1 }}</td>
+                              <td>
+                                {{ d.Producto?.nombre || 'N/A' }}
+                                <span
+                                  class="text-muted font-size-sm"
+                                  *ngIf="d.Producto?.codigo"
+                                >
+                                  ({{ d.Producto?.codigo }})
+                                </span>
+                              </td>
+                              <td>{{ d.cantidad }}</td>
+                              <td>{{ d.precio_unitario | currency: 'Q' }}</td>
+                              <td>{{ d.subtotal | currency: 'Q' }}</td>
+                            </tr>
+
+                            <tr
+                              *ngIf="
+                                !compraSeleccionada.detalles ||
+                                compraSeleccionada.detalles.length === 0
+                              "
+                            >
+                              <td colspan="5" class="text-center text-muted">
+                                Sin detalle de productos.
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Gastos adicionales -->
+                      <h5>Gastos asociados</h5>
+                      <div class="table-responsive mb-2">
+                        <table
+                          class="table table-sm table-striped table-borderless"
+                        >
+                          <thead class="thead-light">
+                            <tr>
+                              <th>#</th>
+                              <th>Descripción</th>
+                              <th>Monto</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              *ngFor="
+                                let g of compraSeleccionada.gastos;
+                                let i = index
+                              "
+                            >
+                              <td>{{ i + 1 }}</td>
+                              <td>{{ g.descripcion }}</td>
+                              <td>{{ g.monto | currency: 'Q' }}</td>
+                            </tr>
+
+                            <tr
+                              *ngIf="
+                                !compraSeleccionada.gastos ||
+                                compraSeleccionada.gastos.length === 0
+                              "
+                            >
+                              <td colspan="3" class="text-center text-muted">
+                                No hay gastos registrados para esta compra.
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div *ngIf="compraSeleccionada.observacion" class="mt-3">
+                        <h6>Observación</h6>
+                        <p>{{ compraSeleccionada.observacion }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      data-dismiss="modal"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- FIN MODAL DETALLE -->
+          </div>
+        </div>
+        <!--end::Entry-->
+      </div>
+    </div>
+  </div>
+</div>

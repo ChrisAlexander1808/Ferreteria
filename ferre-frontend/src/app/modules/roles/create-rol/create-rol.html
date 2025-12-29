@@ -1,0 +1,111 @@
+<div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-row flex-column-fluid page">
+        <app-sidebar></app-sidebar>
+    <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+        <app-top></app-top>  
+
+        <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <!--begin::Subheader-->
+        <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+            <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                <!--begin::Info-->
+                <div class="d-flex align-items-center flex-wrap mr-2">
+                    <!--begin::Page Title-->
+                    <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">Roles</h5>
+                    <!--end::Page Title-->
+                    <!--begin::Actions-->
+                    <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+                    <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+                    <a [routerLink]="['/config/roles']" class="btn btn-light-warning font-weight-bolder btn-sm">Refresh</a>
+                    <!--end::Actions-->
+                </div>
+                <!--end::Info-->
+                
+            </div>
+        </div>
+        <!--end::Subheader-->
+        <!--begin::Entry-->
+        <div class="d-flex flex-column-fluid">
+            <!--begin::Container-->
+            <div class="container">
+                <!--begin::Dashboard-->
+                <!--begin::Row-->
+                <div class="row justify-content-center">
+                    <div class="card card-custom mb-7 w-75">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                Creación de rol y asignación de permisos en los módulos
+                            </h3>
+                            <div class="card-toolbar">
+                                <div class="example-tools justify-content-center">
+                                    <span class="example-toggle" data-toggle="tooltip" title="" data-original-title="View code"></span>
+                                    <span class="example-copy" data-toggle="tooltip" title="" data-original-title="Copy code"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <form class="form">
+                            <div class="card-body">
+                                <div class="form-group row mt-4">
+                                    <label  class="col-3 col-form-label">Nombre del rol:</label>
+                                    <div class="col-9">
+                                        <input type="email" class="form-control" placeholder="Ingrese el nombre que desee colocarle al Rol" name="nombre" [(ngModel)]="roles.nombre"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label  class="col-3 col-form-label">Descripción:</label>
+                                    <div class="col-9">
+                                        <input type="email" class="form-control" placeholder="Ingrese una descripción para el Rol" name="descripcion" [(ngModel)]="roles.descripcion"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-1">
+                                    <label class="col-3 col-form-label">Modulos y Permisos:</label>
+                                    <div class="col-9" style="max-height: 300px; overflow: auto;">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Modulos</th>
+                                                    <th>Permisos</th>
+                                                </tr>
+                                            </thead>                                            
+                                            <tbody>                                                
+                                                <tr *ngFor="let modulo of modulos">                                                    
+                                                    <td>{{modulo.nombre}}</td>
+                                                    <td>                                                       
+                                                        <div *ngFor="let permiso of getPermisosByModulo(modulo.id)">
+                                                            <label class="checkbox checkbox-outline">
+                                                                <input type="checkbox"
+                                                                [checked]="isPermissionSelected(modulo.id, permiso.id)"
+                                                                (change)="onPermissionChange($event, modulo.id, permiso.id)"/> {{permiso.clave}}
+                                                                <span></span>
+                                                            </label>
+                                                        </div>                                                                                                              
+                                                    </td>                                                
+                                                </tr>                                                
+                                            </tbody>                                        
+                                        </table>
+                                    </div>
+                                </div>                                
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                  <div class="col-12 d-flex justify-content-center">
+                                    <button type="reset" class="btn btn-primary mr-2" (click)="save()">Guardar</button>
+                                    <button type="reset" class="btn btn-secondary" [routerLink]="['/config/roles']">Cancelar</button>
+                                  </div>
+                                </div>
+                              </div>
+                        </form>
+                    </div>
+                    
+                </div>
+                <!--end::Row-->
+                
+            </div>
+            <!--end::Container-->
+        </div>
+        <!--end::Entry-->
+    </div>
+    <!--end::Content-->    
+    </div>
+</div>
+</div>

@@ -1,0 +1,404 @@
+<div class="d-flex flex-column flex-root">
+    <div class="d-flex flex-row flex-column-fluid page">
+        <app-sidebar></app-sidebar>
+        <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
+            <app-top></app-top>
+
+            <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+                <!--begin::Subheader-->
+                <div class="subheader py-2 py-lg-4 subheader-solid" id="kt_subheader">
+                    <div
+                        class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+                        <div class="d-flex align-items-center flex-wrap mr-2">
+                            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                                ERP Ferronix
+                            </h5>
+                            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-4 bg-gray-200"></div>
+                            <span class="text-muted font-weight-bold mr-4">#XRS-45670</span>
+                            <a [routerLink]="['/dashboard']"
+                                class="btn btn-light-warning font-weight-bolder btn-sm">Refrescar</a>
+                        </div>
+                    </div>
+                </div>
+                <!--end::Subheader-->
+
+                <!--begin::Entry-->
+                <div class="d-flex flex-column-fluid">
+                    <div class="container">
+                        <div class="card card-custom mb-7">
+                            <div class="card-header flex-wrap border-0 pt-6 pb-0">
+                                <div class="card-title">
+                                    <h3 class="card-label">
+                                        Proveedores
+                                        <span class="text-muted pt-2 font-size-sm d-block">
+                                            Listado de proveedores de la empresa
+                                        </span>
+                                    </h3>
+                                </div>
+                                <div class="card-toolbar">
+                                    <a *ngIf="canCreate" data-toggle="modal" data-target="#modalCreateProveedor"
+                                        class="btn btn-light-success btn-sm font-weight-bold font-size-sm"
+                                        (click)="openCreateModal()">
+                                        <i class="flaticon-add-circular-button"></i>
+                                        Nuevo Proveedor
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <!-- Buscador -->
+                                <div class="mb-11">
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-9 col-xl-10">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-4 my-2 my-md-0">
+                                                    <div class="input-icon">
+                                                        <input type="text" class="form-control"
+                                                            placeholder="Nombre del proveedor o NIT"
+                                                            name="filtro_proveedor" [(ngModel)]="filtro_proveedor"
+                                                            (keyup)="filtrar()" />
+                                                        <span>
+                                                            <i class="flaticon2-search-1 text-muted"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tabla -->
+                                <div class="table-responsive">
+                                    <table class="table table-head-custom table-vertical-center"
+                                        id="kt_advance_table_widget_4">
+                                        <thead>
+                                            <tr class="text-left">
+                                                <th style="min-width: 50px">ID</th>
+                                                <th class="pl-0" style="min-width: 150px">Nombre</th>
+                                                <th style="min-width: 150px">Dirección</th>
+                                                <th style="min-width: 100px">NIT</th>
+                                                <th style="min-width: 100px">Correo</th>
+                                                <th style="min-width: 100px">Teléfono</th>
+                                                <th *ngIf="canUpdate || canDelete" class="pr-0 text-center"
+                                                    style="min-width: 10px">
+                                                    Acciones
+                                                </th>
+                                            </tr>
+                                        </thead>
+
+                                        <ng-container *ngIf="load_data">
+                                            <tr>
+                                                <td colspan="10" class="text-center">
+                                                    <div class="spinner-border" style="width: 3rem; height: 3rem"
+                                                        role="status">
+                                                        <span class="sr-only">Cargando...</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+
+                                        <ng-container *ngIf="!load_data">
+                                            <tbody>
+                                                <tr *ngFor="
+                            let item of proveedores
+                              | paginate
+                                : { itemsPerPage: pageSize, currentPage: page }
+                          ">
+                                                    <td>
+                                                        <span class="text-muted font-weight-bold d-block">
+                                                            {{ item.id }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">
+                                                            {{ item.nombre }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">
+                                                            {{ item.direccion }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">
+                                                            {{ item.nit }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-dark-75 font-size-lg">
+                                                            {{ item.correo }}
+                                                        </span>
+                                                    </td>
+                                                    <td style="text-align: center">
+                                                        <span class="text-dark-75 font-size-lg">
+                                                            {{ item.telefono }}
+                                                        </span>
+                                                    </td>
+                                                    <td *ngIf="canUpdate || canDelete" class="pr-0 text-center">
+                                                        <a *ngIf="canUpdate" style="cursor: pointer; margin-right: 10px"
+                                                            (click)="openEditModal(item.id)">
+                                                            <i class="icon-1x text-dark-50 fas fa-edit"></i>
+                                                        </a>
+
+                                                        <a *ngIf="canDelete" style="cursor: pointer" data-toggle="modal"
+                                                            [attr.data-target]="'#delete-' + item.id">
+                                                            <i class="icon-1x text-dark-50 fas fa-trash-alt"></i>
+                                                        </a>
+
+                                                        <!-- Modal eliminar -->
+                                                        <div class="modal fade" id="delete-{{ item.id }}" tabindex="-1"
+                                                            role="dialog" aria-labelledby="exampleModalLabel"
+                                                            aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel">
+                                                                            Eliminación de Proveedores
+                                                                        </h5>
+                                                                        <button type="button" class="close"
+                                                                            data-dismiss="modal" aria-label="Close">
+                                                                            <i aria-hidden="true"
+                                                                                class="ki ki-close"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p>¿Desea deshabilitar el proveedor?</p>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button"
+                                                                            class="btn btn-warning font-weight-bold"
+                                                                            data-dismiss="modal">
+                                                                            Cerrar
+                                                                        </button>
+
+                                                                        <button *ngIf="load_delete" type="button"
+                                                                            class="btn btn-danger font-weight-bold"
+                                                                            (click)="eliminar_proveedor(item.id)">
+                                                                            Eliminar
+                                                                        </button>
+
+                                                                        <button *ngIf="!load_delete"
+                                                                            class="btn btn-danger" type="button"
+                                                                            disabled>
+                                                                            <span
+                                                                                class="spinner-border spinner-border-sm"
+                                                                                role="status" aria-hidden="true"></span>
+                                                                            Enviando...
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </ng-container>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="card-footer text-center">
+                                <pagination-controls (pageChange)="page = $event" previousLabel="«" nextLabel="»"
+                                    [directionLinks]="true" [autoHide]="false">
+                                </pagination-controls>
+                            </div>
+                        </div>
+                        <!-- MODAL: NUEVO PROVEEDOR -->
+                        <div class="modal fade" id="modalCreateProveedor" tabindex="-1" aria-labelledby="modalCreateProveedorLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalCreateProveedorLabel">
+                                            Nuevo Proveedor
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                        
+                                    <div class="modal-body">
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                                            Ingrese los siguientes datos:
+                                        </h3>
+                        
+                                        <div class="">
+                                            <!-- Nombre -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Nombre <span style="color: red">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre del proveedor" name="nombre"
+                                                        [(ngModel)]="createProveedor.nombre" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- NIT -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    NIT <span style="color: red">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="NIT del proveedor (CF si no tiene)"
+                                                        name="nit" [(ngModel)]="createProveedor.nit" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Dirección -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Dirección
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección del proveedor"
+                                                        name="direccion" [(ngModel)]="createProveedor.direccion" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Teléfono -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Teléfono
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de teléfono" name="telefono"
+                                                        [(ngModel)]="createProveedor.telefono" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Correo -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Correo
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="email" class="form-control" placeholder="Correo electrónico" name="correo"
+                                                        [(ngModel)]="createProveedor.correo" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">
+                                            Cerrar
+                                        </button>
+                        
+                                        <button *ngIf="load_proveedor" type="button" (click)="save_create_proveedor()"
+                                            class="btn btn-primary font-weight-bold">
+                                            Ingresar
+                                        </button>
+                        
+                                        <button *ngIf="!load_proveedor" class="btn btn-primary font-weight-bold" type="button" disabled>
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Ingresando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- MODAL: EDITAR PROVEEDOR -->
+                        <div class="modal fade" id="modalUpdateProveedor" tabindex="-1" aria-labelledby="modalUpdateProveedorLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 600px">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalUpdateProveedorLabel">
+                                            Actualización del Proveedor
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <i aria-hidden="true" class="ki ki-close"></i>
+                                        </button>
+                                    </div>
+                        
+                                    <div class="modal-body">
+                                        <h3 class="font-size-lg text-dark font-weight-bold mb-6">
+                                            Ingrese los siguientes datos:
+                                        </h3>
+                        
+                                        <div class="">
+                                            <!-- Nombre -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Nombre <span style="color: red">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Nombre del proveedor" name="nombre"
+                                                        [(ngModel)]="updateProveedor.nombre" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- NIT -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    NIT <span style="color: red">*</span>
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="NIT del proveedor (CF si no tiene)"
+                                                        name="nit" [(ngModel)]="updateProveedor.nit" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Dirección -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Dirección
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Dirección del proveedor"
+                                                        name="direccion" [(ngModel)]="updateProveedor.direccion" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Teléfono -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Teléfono
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="text" class="form-control" placeholder="Número de teléfono" name="telefono"
+                                                        [(ngModel)]="updateProveedor.telefono" />
+                                                </div>
+                                            </div>
+                        
+                                            <!-- Correo -->
+                                            <div class="form-group row">
+                                                <label class="col-lg-3 col-form-label text-left">
+                                                    Correo
+                                                </label>
+                                                <div class="col-lg-9">
+                                                    <input type="email" class="form-control" placeholder="Correo electrónico" name="correo"
+                                                        [(ngModel)]="updateProveedor.correo" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">
+                                            Cerrar
+                                        </button>
+                        
+                                        <button *ngIf="load_update" type="button" (click)="actualizar()"
+                                            class="btn btn-primary font-weight-bold">
+                                            Actualizar
+                                        </button>
+                        
+                                        <button *ngIf="!load_update" class="btn btn-primary font-weight-bold" type="button" disabled>
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Actualizando...
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- fin modales -->
+                    </div>
+                </div>
+                <!--end::Entry-->
+            </div>
+        </div>
+    </div>
+</div>
